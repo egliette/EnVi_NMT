@@ -1,0 +1,7 @@
+## dataset ignore
+data/
+venv/
+.data/
+*.pt
+__pycache__
+result/

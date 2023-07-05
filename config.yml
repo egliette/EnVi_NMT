@@ -1,0 +1,42 @@
+path:
+    src:
+        train: "parallel_corpora/train.en"
+        valid: "parallel_corpora/valid.en"
+        test: "parallel_corpora/test.en"
+    tgt:
+        train: "parallel_corpora/train.vi"
+        valid: "parallel_corpora/valid.vi"
+        test: "parallel_corpora/test.vi"
+
+checkpoint:
+    dir: "checkpoint"
+    best: "checkpoint_best.pt"
+    last: "checkpoint_last.pt"
+    results: "results.csv"
+    parallel_vocab: "parallel_vocab.pt" 
+    dataloaders: "dataloaders.pt"
+
+
+# training hyperparameters
+batch_size: 32
+total_epoch: 50
+
+clip: 1.0
+
+# model architecture
+d_model: 512
+max_len: 256
+ffn_hidden: 2048
+n_heads: 8
+n_layers: 6
+drop_prob: 0.1
+
+# optimizer
+init_lr: !!float 1e-5
+weight_decay: !!float 5e-4
+adam_eps: !!float 5e-9
+
+# scheduler
+factor: 0.9
+patience: 3
+warmup: 0

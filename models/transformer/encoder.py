@@ -5,7 +5,7 @@ from models.transformer.self_attention import MultiHeadAttentionLayer
 from models.transformer.positionwise_feedforward import PositionwiseFeedforwardLayer
 
 
-class EncoderLayer(nn.Module):
+class EncoderLayer(nn.Module):  
     def __init__(self,
                  hid_dim,
                  n_heads,

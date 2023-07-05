@@ -24,9 +24,9 @@ total_epoch: 50
 clip: 1.0
 
 # model architecture
-d_model: 512
+d_model: 256
 max_len: 256
-ffn_hidden: 2048
+ffn_hidden: 512
 n_heads: 8
 n_layers: 6
 drop_prob: 0.1

@@ -30,7 +30,7 @@ def load_dataloader_from_fpath(pair_fpath, src_tok, tgt_tok, batch_size, max_len
     loader = DataLoader(dataset,
                         batch_size=batch_size,
                         collate_fn=parallel_vocab.collate_fn,
-                        shuffle=False)
+                        shuffle=True)
 
     if is_train:
         return loader, src_tok, tgt_tok

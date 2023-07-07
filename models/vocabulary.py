@@ -13,15 +13,19 @@ class Vocabulary:
     """
 
     def __init__(self):
+        self.pad_token = "<pad>"
+        self.bos_token = "<s>"
+        self.eos_token = "</s>"
+        self.unk_token = "<unk>"
         self.word2id = dict()
-        self.word2id['<pad>'] = 0   # Pad Token
-        self.word2id['<s>'] = 1     # Start Token
-        self.word2id['</s>'] = 2    # End Token
-        self.word2id['<unk>'] = 3   # Unknown Token
-        self.pad_id = self.word2id['<pad>']
-        self.bos_id = self.word2id['<s>']
-        self.eos_id = self.word2id['</s>']
-        self.unk_id = self.word2id['<unk>']
+        self.word2id[self.pad_token] = 0   # Pad Token
+        self.word2id[self.bos_token] = 1   # Start Token
+        self.word2id[self.eos_token] = 2   # End Token
+        self.word2id[self.unk_token] = 3   # Unknown Token
+        self.pad_id = self.word2id[self.pad_token]
+        self.bos_id = self.word2id[self.bos_token]
+        self.eos_id = self.word2id[self.eos_token]
+        self.unk_id = self.word2id[self.unk_token]
         self.id2word = {v: k for k, v in self.word2id.items()}
 
     def __getitem__(self, word):
@@ -54,7 +58,7 @@ class Vocabulary:
 
     def words2tensor(self, words, add_bos_eos=False):
         if add_bos_eos:
-            processed_words = ['<s>'] + words + ['</s>']
+            processed_words = [self.bos_token] + words + [self.eos_token]
         else:
             processed_words = words
         return torch.tensor(list(map(lambda w: self[w], processed_words)), dtype=torch.int64)

@@ -1,3 +1,4 @@
+%%writefile config.yml
 path:
     train:
         src: "parallel_corpora/train.en"
@@ -8,7 +9,7 @@ path:
     test:
         src: "parallel_corpora/test.en"
         tgt: "parallel_corpora/test.vi"
-        
+
 
 checkpoint:
     dir: "checkpoint"
@@ -36,11 +37,4 @@ n_layers: 3
 drop_prob: 0.1
 
 # optimizer
-init_lr: !!float 1e-5
-weight_decay: !!float 5e-4
-adam_eps: !!float 5e-9
-
-# scheduler
-factor: 0.9
-patience: 3
-warmup: 0
+init_lr: !!float 5e-4

@@ -8,15 +8,17 @@ class ParallelDataset(Dataset):
     def __init__(self, src_tokenized_sents, tgt_tokenized_sents,
                  src_tokenizer, tgt_tokenizer, is_sorted=True):
         if is_sorted:
-            self.src_tokenized_sents = sorted(src_tokenized_sents, key=len)
-            self.src_tokenized_sents = sorted(tgt_tokenized_sents, key=len)
+            pair = zip(src_tokenized_sents, tgt_tokenized_sents)
+            sorted_pair = sorted(pair, key=lambda p: len(p[0]))
+            unzipped_pair = list(zip(*sorted_pair))
+            self.src_tokenized_sents, self.tgt_tokenized_sents = unzipped_pair
         else:
             self.src_tokenized_sents = src_tokenized_sents
             self.tgt_tokenized_sents = tgt_tokenized_sents
 
-        self.src_mapped_sents = src_tokenizer.vocab.sents2tensors(src_tokenized_sents,
+        self.src_mapped_sents = src_tokenizer.vocab.sents2tensors(self.src_tokenized_sents,
                                                                   add_bos_eos=True)
-        self.tgt_mapped_sents = tgt_tokenizer.vocab.sents2tensors(tgt_tokenized_sents,
+        self.tgt_mapped_sents = tgt_tokenizer.vocab.sents2tensors(self.tgt_tokenized_sents,
                                                                   add_bos_eos=True)
 
     def __len__(self):

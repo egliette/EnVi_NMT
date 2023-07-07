@@ -1,4 +1,5 @@
 import yaml
+from tqdm import tqdm
 
 import torch
 from torch.utils.data import random_split
@@ -13,25 +14,6 @@ def pad_tensor(sents, pad_id):
     # return padded_tensor, lengths
     return padded_tensor
 
-def add_bos_eos(tensor, bos_id, eos_id):
-    bos_tensor = torch.tensor([bos_id])
-    eos_tensor = torch.tensor([eos_id])
-    return torch.cat((bos_tensor, tensor, eos_tensor))
-
-def collate_fn(parallel_vocab, examples):
-    src_sents = [src for src, __ in examples]
-    src_tensors = parallel_vocab.corpus_to_tensor(src_sents)
-    processed_src = list(map(lambda tensor: add_bos_eos(tensor,
-                                                        parallel_vocab.src.bos_id,
-                                                        parallel_vocab.src.eos_id),
-                             src_tensors))
-
-    tgt_sents = [tgt for __, tgt in examples]
-    processed_tgt = parallel_vocab.corpus_to_tensor(tgt_sents, is_source=False)
-
-    return {"src": pad_tensor(processed_src, parallel_vocab.src.pad_id),
-            "tgt": pad_tensor(processed_tgt, parallel_vocab.tgt.pad_id)}
-
 def split_dataset(dataset, split_rate):
     full_size = len(dataset)
     train_size = (int)(split_rate * full_size)
@@ -43,3 +25,37 @@ def get_config(file_path):
     with open(file_path, "r") as f:
         config = yaml.safe_load(f)
     return config
+
+def read_sents(fpath, is_lowercase=False):
+    sents = list()
+    with open(fpath, "r", encoding="utf-8") as f:
+        for line in f:
+            sents.append(line.rstrip("\n"))
+
+    if is_lowercase:
+        return [s.lower() for s in sents]
+    else:
+        return sents
+
+def is_sent_valid(tokenized_sent, max_sent_len):
+    sent_len = len(tokenized_sent)
+    return (sent_len < max_sent_len and sent_len > 0)
+
+
+def tokenize_and_remove_invalid_sents(src_sents, tgt_sents, max_sent_len,
+                                      src_tokenize_func, tgt_tokenize_func):
+    src_tokenized_sents = list()
+    tgt_tokenized_sents = list()
+
+    total_lines = len(src_sents)
+    for i in tqdm(range(total_lines)):
+        src_tokenized_s = src_tokenize_func(src_sents[i])
+        tgt_tokenized_s = tgt_tokenize_func(tgt_sents[i])
+        if (is_sent_valid(src_tokenized_s, max_sent_len) and
+            is_sent_valid(tgt_tokenized_s, max_sent_len)):
+            src_tokenized_sents.append(src_tokenized_s)
+            tgt_tokenized_sents.append(tgt_tokenized_s)
+
+    print(f"Remove {total_lines - len(src_tokenized_sents)} invalid sentences")
+
+    return src_tokenized_sents, tgt_tokenized_sents

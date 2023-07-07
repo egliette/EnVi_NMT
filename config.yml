@@ -1,19 +1,23 @@
 path:
-    src:
-        train: "parallel_corpora/train.en"
-        valid: "parallel_corpora/valid.en"
-        test: "parallel_corpora/test.en"
-    tgt:
-        train: "parallel_corpora/train.vi"
-        valid: "parallel_corpora/valid.vi"
-        test: "parallel_corpora/test.vi"
+    train:
+        src: "parallel_corpora/train.en"
+        tgt: "parallel_corpora/train.vi"
+    valid:
+        src: "parallel_corpora/valid.en"
+        tgt: "parallel_corpora/valid.vi"
+    test:
+        src: "parallel_corpora/test.en"
+        tgt: "parallel_corpora/test.vi"
+        
 
 checkpoint:
     dir: "checkpoint"
     best: "checkpoint_best.pt"
     last: "checkpoint_last.pt"
     results: "results.csv"
-    parallel_vocab: "parallel_vocab.pt" 
+    tokenizer:
+        src: "src_tok.pt"
+        tgt: "tgt_tok.pt"
     dataloaders: "dataloaders.pt"
 
 
@@ -28,7 +32,7 @@ d_model: 256
 max_len: 256
 ffn_hidden: 512
 n_heads: 8
-n_layers: 6
+n_layers: 3
 drop_prob: 0.1
 
 # optimizer

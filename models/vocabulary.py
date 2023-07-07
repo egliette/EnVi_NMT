@@ -3,6 +3,8 @@ from collections import Counter
 
 import torch
 
+from utils.data_utils import pad_tensor
+
 
 class Vocabulary:
     """ The Vocabulary class heavily inspired by machine translation exercise of
@@ -10,7 +12,7 @@ class Vocabulary:
         and vice versa.
     """
 
-    def __init__(self, tokenizer):
+    def __init__(self):
         self.word2id = dict()
         self.word2id['<pad>'] = 0   # Pad Token
         self.word2id['<s>'] = 1     # Start Token
@@ -21,7 +23,6 @@ class Vocabulary:
         self.eos_id = self.word2id['</s>']
         self.unk_id = self.word2id['<unk>']
         self.id2word = {v: k for k, v in self.word2id.items()}
-        self.tokenizer = tokenizer
 
     def __getitem__(self, word):
         return self.word2id.get(word, self.unk_id)
@@ -51,69 +52,33 @@ class Vocabulary:
         else:
             return self[word]
 
-    def tokenize_corpus(self, corpus):
-        """Split the documents of the corpus into words
-        @param corpus (list(str)): list of documents
-        @return tokenized_corpus (list(list(str))): list of words
-        """
-        tokenized_corpus = list()
-        for document in corpus:
-            tokenized_document = self.tokenizer.tokenize(document)
-            tokenized_corpus.append(tokenized_document)
-
-        return tokenized_corpus
-
-    def corpus_to_tensor(self, corpus, is_tokenized=False):
-        """ Convert corpus to a list of indices tensor
-        @param corpus (list(str) if is_tokenized==False else list(list(str)))
-        @param is_tokenized (bool)
-        @return indicies_corpus (list(tensor))
-        """
-        if is_tokenized:
-            tokenized_corpus = corpus
+    def words2tensor(self, words, add_bos_eos=False):
+        if add_bos_eos:
+            processed_words = ['<s>'] + words + ['</s>']
         else:
-            tokenized_corpus = self.tokenize_corpus(corpus)
-        indicies_corpus = list()
-        for document in tokenized_corpus:
-            indicies_document = torch.tensor(list(map(lambda word: self[word], document)),
-                                             dtype=torch.int64)
-            indicies_corpus.append(indicies_document)
+            processed_words = words
+        return torch.tensor(list(map(lambda w: self[w], processed_words)), dtype=torch.int64)
 
-        return indicies_corpus
+    def sents2tensors(self, tokenized_sents, add_bos_eos=False):
+        tensors = list()
+        for s in tokenized_sents:
+            tensors.append(self.words2tensor(s, add_bos_eos))
+        return tensors
 
-    def tensor_to_corpus(self, tensor):
-        """ Convert list of indices tensor to a list of tokenized documents
-        @param indicies_corpus (list(tensor))
-        @return corpus (list(list(str)))
-        """
-        corpus = list()
-        for indicies in tensor:
-            document = list(map(lambda index: self.id2word[index.item()], indicies))
-            corpus.append(document)
+    def tensor2words(self, tensor):
+        return list(map(lambda index: self.id2word[index.item()], tensor))
 
-        return corpus
+    def tensors2sents(self, tensors):
+        tokenized_sents = list()
+        for t in tensors:
+            tokenized_sents.append(self.tensor2words)
+        return tokenized_sents
 
-    def add_words_from_corpus(self, corpus=None, corpus_fpath=None,
-                              is_tokenized=False, min_freq=1, lowercase=False):
-        print("Add tokens from the corpus...")
-
-        if corpus_fpath is not None:
-            corpus = list()
-            with open(corpus_fpath, "r", encoding="utf-8") as f:
-                for line in f:
-                    if lowercase:
-                        corpus.append(line.rstrip("\n").lower())
-                    else:
-                        corpus.append(line.rstrip("\n"))
-
-        if is_tokenized:
-            tokenized_corpus = corpus
-        else:
-            tokenized_corpus = self.tokenize_corpus(corpus)
-
-        word_freq = Counter(chain(*tokenized_corpus))
+    def add_words(self, tokenized_sents, min_freq=1):
+        print("Add tokens from the sentences...")
+        word_freq = Counter(chain(*tokenized_sents))
         non_singletons = [w for w in word_freq if word_freq[w] >= min_freq]
-        print(f"Number of tokens in the corpus: {len(word_freq)}")
+        print(f"Number of tokens in the sentences: {len(word_freq)}")
         print(f"Number of tokens appearing at least {min_freq} times: {len(non_singletons)}")
         for word in non_singletons:
             self.add(word)
@@ -121,24 +86,13 @@ class Vocabulary:
 
 class ParallelVocabulary:
 
-    def __init__(self, src_vocab, tgt_vocab):
+    def __init__(self, src_vocab, tgt_vocab, device):
         self.src = src_vocab
         self.tgt = tgt_vocab
+        self.device = device
 
-    def tokenize_corpus(self, corpus, is_source=True):
-        if is_source:
-            return self.src.tokenize_corpus(corpus)
-        else:
-            return self.tgt.tokenize_corpus(corpus)
-
-    def corpus_to_tensor(self, corpus, is_tokenized=False, is_source=True):
-        if is_source:
-            return self.src.corpus_to_tensor(corpus, is_tokenized)
-        else:
-            return self.tgt.corpus_to_tensor(corpus, is_tokenized)
-
-    def tensor_to_corpus(self, tensor, is_source=True):
-        if is_source:
-            return self.src.tensor_to_corpus(tensor)
-        else:
-            return self.tgt.tensor_to_corpus(tensor)
+    def collate_fn(self, examples):
+        src_sents = [pair["src"] for pair in examples]
+        tgt_sents = [pair["tgt"] for pair in examples]
+        return {"src": pad_tensor(src_sents, self.src.pad_id).to(self.device),
+                "tgt": pad_tensor(tgt_sents, self.tgt.pad_id).to(self.device)}

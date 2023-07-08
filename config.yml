@@ -1,14 +1,13 @@
-%%writefile config.yml
 path:
     train:
-        src: "parallel_corpora/train.en"
-        tgt: "parallel_corpora/train.vi"
+        src: "dataset/train.en"
+        tgt: "dataset/train.vi"
     valid:
-        src: "parallel_corpora/valid.en"
-        tgt: "parallel_corpora/valid.vi"
+        src: "dataset/valid.en"
+        tgt: "dataset/valid.vi"
     test:
-        src: "parallel_corpora/test.en"
-        tgt: "parallel_corpora/test.vi"
+        src: "dataset/test.en"
+        tgt: "dataset/test.vi"
 
 
 checkpoint:

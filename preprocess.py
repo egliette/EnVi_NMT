@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import DataLoader
 
-from dataset.parallel_dataset import ParallelDataset
+from models.parallel_dataset import ParallelDataset
 from models.tokenizer import EnTokenizer, ViTokenizer
 from models.vocabulary import ParallelVocabulary
 import utils.data_utils as data_utils

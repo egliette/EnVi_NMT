@@ -1,51 +1,29 @@
 import math
 from collections import Counter
 
-import numpy as np
 
+def count_n_gram(tokens, n):
+    return Counter([tuple(tokens[i:i + n]) for i in range(len(tokens) + 1 - n)])
 
-def bleu_stats(hypothesis, reference):
-    """Compute statistics for BLEU."""
-    stats = list()
-    stats.append(len(hypothesis))
-    stats.append(len(reference))
-    for n in range(1, 5):
-        s_ngrams = Counter(
-            [tuple(hypothesis[i:i + n]) for i in range(len(hypothesis) + 1 - n)]
-        )
-        r_ngrams = Counter(
-            [tuple(reference[i:i + n]) for i in range(len(reference) + 1 - n)]
-        )
+def precision_i(pred_tokens, tgt_tokens, i):
+    pred_i_grams = count_n_gram(pred_tokens, i)
+    tgt_i_grams = count_n_gram(tgt_tokens, i)
 
-        stats.append(max([sum((s_ngrams & r_ngrams).values()), 0]))
-        stats.append(max([len(hypothesis) + 1 - n, 0]))
-    return stats
+    total_matched_i_grams = 0
+    total_pred_i_grams = 0
+    for pred_i_gram, pred_count in pred_i_grams.items():
+        tgt_matched_count = tgt_i_grams.get(pred_i_gram, 0)
+        total_matched_i_grams += min(tgt_matched_count, pred_count)
+        total_pred_i_grams += pred_count
+    
+    return total_matched_i_grams / total_pred_i_grams
 
+def calculate_bleu(pred_tokens, tgt_tokens):
+    brevity_penalty = min(1, math.exp(1 - len(tgt_tokens)/len(pred_tokens)))
+    n_gram_overlap = 1
 
-def bleu(stats):
-    """Compute BLEU given n-gram statistics."""
-    if len(list(filter(lambda x: x == 0, stats))) > 0:
-        return 0
-    (c, r) = stats[:2]
-    log_bleu_prec = sum(
-        [math.log(float(x) / y) for x, y in zip(stats[2::2], stats[3::2])]
-    ) / 4.
-    return math.exp(min([0, 1 - float(r) / c]) + log_bleu_prec)
-
-
-def get_bleu(hypotheses, reference):
-    """Get validation BLEU score for dev set."""
-    stats = np.array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0.])
-    for hyp, ref in zip(hypotheses, reference):
-        stats += np.array(bleu_stats(hyp, ref))
-    return 100 * bleu(stats)
-
-
-def idx_to_word(x, vocab):
-    words = []
-    for i in x:
-        word = vocab.id2word[i.item()]
-        if '<' not in word:
-            words.append(word)
-    words = " ".join(words)
-    return words
+    for i in range(1, 5):
+        n_gram_overlap *= precision_i(pred_tokens, tgt_tokens, i)
+    
+    bleu = brevity_penalty * math.pow(n_gram_overlap, 1/4)
+    return bleu

@@ -13,19 +13,19 @@ class Vocabulary:
     """
 
     def __init__(self):
-        self.pad_token = "<pad>"
-        self.bos_token = "<s>"
-        self.eos_token = "</s>"
         self.unk_token = "<unk>"
+        self.pad_token = "<pad>"
+        self.bos_token = "<sos>"
+        self.eos_token = "<eos>"
         self.word2id = dict()
-        self.word2id[self.pad_token] = 0   # Pad Token
-        self.word2id[self.bos_token] = 1   # Start Token
-        self.word2id[self.eos_token] = 2   # End Token
-        self.word2id[self.unk_token] = 3   # Unknown Token
+        self.word2id[self.unk_token] = 0   
+        self.word2id[self.pad_token] = 1   
+        self.word2id[self.bos_token] = 2   
+        self.word2id[self.eos_token] = 3   
+        self.unk_id = self.word2id[self.unk_token]
         self.pad_id = self.word2id[self.pad_token]
         self.bos_id = self.word2id[self.bos_token]
         self.eos_id = self.word2id[self.eos_token]
-        self.unk_id = self.word2id[self.unk_token]
         self.id2word = {v: k for k, v in self.word2id.items()}
 
     def __getitem__(self, word):

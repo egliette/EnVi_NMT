@@ -16,7 +16,10 @@ def precision_i(pred_tokens, tgt_tokens, i):
         total_matched_i_grams += min(tgt_matched_count, pred_count)
         total_pred_i_grams += pred_count
     
-    return total_matched_i_grams / total_pred_i_grams
+    if total_pred_i_grams == 0:
+        return 0
+    else:
+        return total_matched_i_grams / total_pred_i_grams
 
 def calculate_bleu(pred_tokens, tgt_tokens):
     brevity_penalty = min(1, math.exp(1 - len(tgt_tokens)/len(pred_tokens)))

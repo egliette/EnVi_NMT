@@ -6,7 +6,6 @@ from torch.utils.data import random_split
 
 
 def pad_tensor(sents, pad_id):
-    sorted_sents = sorted(sents, key=lambda s: len(s), reverse=True)
     # lengths = torch.tensor([len(s) for s in sents])
     padded_tensor = torch.nn.utils.rnn.pad_sequence(sents,
                                                     batch_first=True,

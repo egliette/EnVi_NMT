@@ -18,10 +18,10 @@ class Vocabulary:
         self.bos_token = "<sos>"
         self.eos_token = "<eos>"
         self.word2id = dict()
-        self.word2id[self.unk_token] = 0   
-        self.word2id[self.pad_token] = 1   
-        self.word2id[self.bos_token] = 2   
-        self.word2id[self.eos_token] = 3   
+        self.word2id[self.unk_token] = 0
+        self.word2id[self.pad_token] = 1
+        self.word2id[self.bos_token] = 2
+        self.word2id[self.eos_token] = 3
         self.unk_id = self.word2id[self.unk_token]
         self.pad_id = self.word2id[self.pad_token]
         self.bos_id = self.word2id[self.bos_token]
@@ -90,13 +90,18 @@ class Vocabulary:
 
 class ParallelVocabulary:
 
-    def __init__(self, src_vocab, tgt_vocab, device):
+    def __init__(self, src_vocab, tgt_vocab, is_sorted, device):
         self.src = src_vocab
         self.tgt = tgt_vocab
+        self.is_sorted = is_sorted
         self.device = device
 
-    def collate_fn(self, examples):
+    def collate_fn(self, examples, is_sorted=False):
         src_sents = [pair["src"] for pair in examples]
         tgt_sents = [pair["tgt"] for pair in examples]
+        if self.is_sorted:
+            pairs = zip(src_sents, tgt_sents)
+            sorted_pairs = zip(*sorted(pairs, key= lambda x: (len(x[0]), len(x[1])), reverse=True))
+            src_sents, tgt_sents = tuple(list(sorted_sents) for sorted_sents in sorted_pairs)
         return {"src": pad_tensor(src_sents, self.src.pad_id).to(self.device),
                 "tgt": pad_tensor(tgt_sents, self.tgt.pad_id).to(self.device)}

@@ -25,7 +25,7 @@ def calculate_bleu(pred_sents, tgt_sents):
     for i in range(1, 5):
         prec_i = precision_i(pred_sents,  tgt_sents, i)
         if prec_i == 0:
-            n_gram_overlap = 0
+            return 0.0
         else:
             n_gram_overlap += 0.25 * math.log(prec_i)
 

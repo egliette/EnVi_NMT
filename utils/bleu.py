@@ -23,7 +23,11 @@ def calculate_bleu(pred_sents, tgt_sents):
     n_gram_overlap = 0
 
     for i in range(1, 5):
-        n_gram_overlap += 0.25 * math.log(precision_i(pred_sents,  tgt_sents, i))
+        prec_i = precision_i(pred_sents,  tgt_sents, i)
+        if prec_i == 0:
+            n_gram_overlap = 0
+        else:
+            n_gram_overlap += 0.25 * math.log(prec_i)
 
     geometric_mean = math.exp(n_gram_overlap)
 

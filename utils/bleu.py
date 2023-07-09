@@ -17,6 +17,8 @@ def precision_i(pred_sents, tgt_sents, i):
             tgt_matched_count = tgt_i_grams.get(pred_i_gram, 0)
             total_matched_i_grams += min(tgt_matched_count, pred_count)
 
+    if total_pred_i_grams == 0:
+        return 0
     return total_matched_i_grams / total_pred_i_grams
 
 def calculate_bleu(pred_sents, tgt_sents):

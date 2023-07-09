@@ -8,7 +8,7 @@ import utils.data_utils as data_utils
 import utils.other_utils as other_utils
 
 
-def load_dataloader_from_fpath(pair_fpath, src_tok, tgt_tok, batch_size, max_len, 
+def load_dataloader_from_fpath(pair_fpath, src_tok, tgt_tok, batch_size, max_len,
                                device, is_lowercase=True, is_train=False, is_sorted=True):
     src_sents = data_utils.read_sents(pair_fpath["src"], is_lowercase)
     tgt_sents = data_utils.read_sents(pair_fpath["tgt"], is_lowercase)
@@ -24,13 +24,14 @@ def load_dataloader_from_fpath(pair_fpath, src_tok, tgt_tok, batch_size, max_len
         print(f"Create vocabulary from {pair_fpath['tgt']}...")
         tgt_tok.train_vocab(tgt_tok_sents, is_tokenized=True)
 
-    dataset = ParallelDataset(src_tok_sents, tgt_tok_sents, src_tok, tgt_tok, is_sorted=True)
-    parallel_vocab = ParallelVocabulary(src_tok.vocab, tgt_tok.vocab, device)
+    dataset = ParallelDataset(src_tok_sents, tgt_tok_sents, src_tok, tgt_tok)
+    parallel_vocab = ParallelVocabulary(src_tok.vocab, tgt_tok.vocab,
+                                        is_sorted=not is_train, device=device)
 
     loader = DataLoader(dataset,
                         batch_size=batch_size,
                         collate_fn=parallel_vocab.collate_fn,
-                        shuffle=True)
+                        shuffle=is_train)
 
     if is_train:
         return loader, src_tok, tgt_tok

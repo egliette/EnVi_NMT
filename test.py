@@ -1,8 +1,13 @@
 import torch
+from torch import nn
 
 import utils.data_utils as data_utils
 import utils.model_utils as model_utils
-from models.model.transformer import Transformer
+
+from models.transformer.encoder import Encoder
+from models.transformer.decoder import Decoder
+from models.transformer.seq2seq import Seq2Seq
+
 
 
 print("Load config file...")
@@ -11,37 +16,51 @@ for key, value in config.items():
     globals()[key] = value
 
 
-print("Ensure directory and load file paths...")
-checkpoint_fpath = "/".join([checkpoint["dir"], checkpoint["best"]])
-vocab_fpath = "/".join([checkpoint["dir"], checkpoint["parallel_vocab"]])
+print("Load prepared dataloader & tokenizers...")
 dataloaders_fpath = "/".join([checkpoint["dir"], checkpoint["dataloaders"]])
-
-envi_vocab = torch.load(vocab_fpath)
 dataloaders = torch.load(dataloaders_fpath)
 test_loader = dataloaders["test_loader"]
+
+src_tok_fpath = "/".join([checkpoint["dir"], checkpoint["tokenizer"]["src"]])
+tgt_tok_fpath = "/".join([checkpoint["dir"], checkpoint["tokenizer"]["tgt"]])
+src_tok = torch.load(src_tok_fpath)
+tgt_tok = torch.load(tgt_tok_fpath)
 
 
 print("Load model...")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-enc_voc_size = len(envi_vocab.src)
-dec_voc_size = len(envi_vocab.tgt)
+enc_voc_size = len(src_tok.vocab)
+dec_voc_size = len(tgt_tok.vocab)
 
-model = Transformer(src_pad_idx=envi_vocab.src.pad_id,
-                    tgt_pad_idx=envi_vocab.tgt.pad_id,
-                    tgt_sos_idx=envi_vocab.tgt.bos_id,
-                    d_model=d_model,
-                    enc_voc_size=enc_voc_size,
-                    dec_voc_size=dec_voc_size,
-                    max_len=max_len,
-                    ffn_hidden=ffn_hidden,
-                    n_head=n_heads,
-                    n_layers=n_layers,
-                    drop_prob=0.00,
-                    device=device).to(device)
+enc = Encoder(input_dim=enc_voc_size,
+              hid_dim=d_model,
+              n_layers=n_layers,
+              n_heads=n_heads,
+              pf_dim=ffn_hidden,
+              dropout=drop_prob,
+              device=device,
+              max_length=max_len)
+
+dec = Decoder(output_dim=dec_voc_size,
+              hid_dim=d_model,
+              n_layers=n_layers,
+              n_heads=n_heads,
+              pf_dim=ffn_hidden,
+              dropout=drop_prob,
+              device=device,
+              max_length=max_len)
+
+src_pad_id = src_tok.vocab.pad_id
+tgt_pad_id = tgt_tok.vocab.pad_id
+
+model = Seq2Seq(enc, dec, src_pad_id, tgt_pad_id, device).to(device)
+
+criterion = nn.CrossEntropyLoss(ignore_index=tgt_pad_id)
 
 
-print("Load checkpoint...")
+print("Load the best checkpoint...")
+best_checkpoint_fpath = "/".join([checkpoint["dir"], checkpoint["best"]])
 checkpoint_dict = torch.load(checkpoint_fpath)
 model.load_state_dict(checkpoint_dict["model_state_dict"])
 
@@ -49,5 +68,6 @@ print(f"The model has {model_utils.count_parameters(model):,} trainable paramete
 
 
 print("Start testing...")
-model_utils.test(model, test_loader, envi_vocab)
+model_utils.test(model, test_loader, criterion, src_tok, tgt_tok, max_len)
+
 print("Finish testing!")

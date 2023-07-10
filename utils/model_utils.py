@@ -1,6 +1,11 @@
+import math
+
 from tqdm import tqdm
 import torch
 import torch.nn as nn
+
+import utils.bleu as bleu
+import utils.model_utils as model_utils
 
 
 def count_parameters(model):
@@ -29,7 +34,7 @@ def translate_sentence(sent, src_tok, tgt_tok, model, device, max_len = 256, tgt
 
     for i in range(max_len):
         tgt_tensor = torch.LongTensor(tgt_indexes).unsqueeze(0).to(device)
-        tgt_mask = model.make_trg_mask(tgt_tensor)
+        tgt_mask = model.make_tgt_mask(tgt_tensor)
         with torch.no_grad():
             output, attention = model.decoder(tgt_tensor, enc_src, tgt_mask, src_mask)
         pred_token = output.argmax(2)[:,-1].item()
@@ -57,33 +62,33 @@ def translate_tensor_teacher_forcing(src_tensor, tgt_tensor, tgt_tok,
 
     return pred_tokens
 
-def train(epoch, model, iterator, optimizer, criterion, clip):
+def train(epoch, model, loader, optimizer, criterion, clip):
 
     model.train()
     device = model.device
     epoch_loss = 0
 
-    with tqdm(enumerate(iterator), total=len(iterator)) as pbar:
+    with tqdm(enumerate(loader), total=len(loader)) as pbar:
         pbar.set_description(f"Epoch {epoch}")
         for i, batch in pbar:
             src = batch["src"]
-            trg = batch["tgt"]
+            tgt = batch["tgt"]
 
             optimizer.zero_grad()
-            output, _ = model(src, trg[:,:-1])
+            output, _ = model(src, tgt[:,:-1])
 
-            #output = [batch size, trg len - 1, output dim]
-            #trg = [batch size, trg len]
+            #output = [batch size, tgt len - 1, output dim]
+            #tgt = [batch size, tgt len]
 
             output_dim = output.shape[-1]
 
             output = output.contiguous().view(-1, output_dim)
-            trg = trg[:,1:].contiguous().view(-1)
+            tgt = tgt[:,1:].contiguous().view(-1)
 
-            #output = [batch size * trg len - 1, output dim]
-            #trg = [batch size * trg len - 1]
+            #output = [batch size * tgt len - 1, output dim]
+            #tgt = [batch size * tgt len - 1]
 
-            loss = criterion(output, trg)
+            loss = criterion(output, tgt)
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), clip)
             optimizer.step()
@@ -91,9 +96,9 @@ def train(epoch, model, iterator, optimizer, criterion, clip):
             epoch_loss += loss.item()
             pbar.set_postfix({"loss": epoch_loss/(i+1)})
 
-    return epoch_loss / len(iterator)
+    return epoch_loss / len(loader)
 
-def evaluate(model, iterator, criterion):
+def evaluate(model, loader, criterion):
 
     model.eval()
     device = model.device
@@ -101,59 +106,38 @@ def evaluate(model, iterator, criterion):
 
     with torch.no_grad():
 
-        for i, batch in enumerate(iterator):
+        for i, batch in enumerate(loader):
 
             src = batch["src"]
-            trg = batch["tgt"]
+            tgt = batch["tgt"]
 
-            output, _ = model(src, trg[:,:-1])
+            output, _ = model(src, tgt[:,:-1])
 
-            #output = [batch size, trg len - 1, output dim]
-            #trg = [batch size, trg len]
+            #output = [batch size, tgt len - 1, output dim]
+            #tgt = [batch size, tgt len]
 
             output_dim = output.shape[-1]
 
             output = output.contiguous().view(-1, output_dim)
-            trg = trg[:,1:].contiguous().view(-1)
+            tgt = tgt[:,1:].contiguous().view(-1)
 
-            #output = [batch size * trg len - 1, output dim]
-            #trg = [batch size * trg len - 1]
+            #output = [batch size * tgt len - 1, output dim]
+            #tgt = [batch size * tgt len - 1]
 
-            loss = criterion(output, trg)
+            loss = criterion(output, tgt)
 
             epoch_loss += loss.item()
 
-    return epoch_loss / len(iterator)
+    return epoch_loss / len(loader)
 
-# def test(model, iterator, parallel_vocab):
-#     device = model.device
+def test(model, test_loader, criterion, src_tok, tgt_tok, max_len):
+    device = model.device
 
-#     with torch.no_grad():
-#         batch_bleu = []
-#         for i, batch in enumerate(iterator):
-#             src = batch["src"].to(device)
-#             tgt = batch["tgt"].to(device)
-#             output = model(src, tgt[:, :-1])
-
-#             total_bleu = []
-#             for j in range(batch["tgt"].shape[0]):
-#                 src_words = idx_to_word(src[j], parallel_vocab.src)
-#                 tgt_words = idx_to_word(tgt[j], parallel_vocab.tgt)
-
-#                 output_words = output[j].max(dim=1)[1]
-#                 output_words = idx_to_word(output_words, parallel_vocab.tgt)
-
-#                 print("source :", src_words)
-#                 print("target :", tgt_words)
-#                 print("predicted :", output_words)
-#                 print()
-#                 bleu = get_bleu(hypotheses=output_words.split(), reference=tgt_words.split())
-#                 total_bleu.append(bleu)
-
-
-#             total_bleu = sum(total_bleu) / len(total_bleu)
-#             print(f"BLEU SCORE = {total_bleu}")
-#             batch_bleu.append(total_bleu)
-
-#         batch_bleu = sum(batch_bleu) / len(batch_bleu)
-#         print(f"TOTAL BLEU SCORE = {batch_bleu}")
+    test_loss = model_utils.evaluate(model, test_loader, criterion)
+    test_BLEU = bleu.calculate_dataloader_bleu(test_loader, src_tok, tgt_tok, 
+                                               model, device, max_len=max_len, 
+                                               teacher_forcing=False, 
+                                               print_pair=True) * 100
+    
+    print(f"\tVal Loss: {test_loss:.3f} |  Val PPL: {math.exp(test_loss):7.3f}")
+    print(f"TOTAL BLEU SCORE = {test_BLEU}")

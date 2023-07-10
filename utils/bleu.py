@@ -45,32 +45,37 @@ def calculate_bleu(pred_sents, tgt_sents):
     bleu = brevity_penalty * geometric_mean
     return bleu
 
-def calculate_dataloader_bleu(dataloader, src_tok, tgt_tok, model, device, max_len=256,
-                   teacher_forcing=False):
+def calculate_dataloader_bleu(dataloader, src_tok, tgt_tok, model, device, 
+                              max_len=256, teacher_forcing=False, print_pair=False):
 
     dataset = dataloader.dataset
-    tgts = []
-    pred_tgts = []
-    another_tgts = list()
+    pred_sents = list()
+    tgt_sents = list()
 
-    for data in tqdm(dataset):
+    for data in tqdm(dataset, desc ="BLEU calculating"):
         src_tokens = src_tok.vocab.tensor2words(data["src"])
         tgt_tokens = tgt_tok.vocab.tensor2words(data["tgt"])
 
         if teacher_forcing:
-            pred_tgt = translate_tensor_teacher_forcing(data["src"], data["tgt"],
+            pred_tokens = translate_tensor_teacher_forcing(data["src"], data["tgt"],
                                                         tgt_tok, model, device, max_len)
         else:
-            pred_tgt, _ = translate_sentence(src_tokens, src_tok, tgt_tok, 
+            pred_tokens, _ = translate_sentence(src_tokens, src_tok, tgt_tok, 
                                              model, device, max_len)
             # cut off <eos> token
-            pred_tgt = pred_tgt[:-1]
+            pred_tokens = pred_tokens[:-1]
 
         # cut off <bos> and <eos> tokens
         tgt_tokens = tgt_tokens[1:-1]
+        src_tokens = src_tokens[1:-1]
 
-        pred_tgts.append(pred_tgt)
-        tgts.append([tgt_tokens])
-        another_tgts.append(tgt_tokens)
+        pred_sents.append(pred_tokens)
+        tgt_sents.append(tgt_tokens)
 
-    return calculate_bleu(pred_tgts, another_tgts)
+        if print_pair:
+            print("Source:", " ".join(src_tokens))
+            print("Target:", " ".join(tgt_tokens))
+            print("Predict:", " ".join(pred_tokens))
+            print("BLEU:", calculate_bleu([pred_tokens], [tgt_tokens]))
+
+    return calculate_bleu(pred_sents, tgt_sents)

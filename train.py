@@ -1,3 +1,6 @@
+import os
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3" 
+
 import math
 
 import pandas as pd
@@ -5,10 +8,10 @@ import torch
 from torch import nn
 from torch.optim import Adam
 
+import utils.bleu as bleu
 import utils.data_utils as data_utils
 import utils.model_utils as model_utils
 import utils.other_utils as other_utils
-import utils.bleu as bleu
 from models.transformer.encoder import Encoder
 from models.transformer.decoder import Decoder
 from models.transformer.seq2seq import Seq2Seq
@@ -21,7 +24,7 @@ for key, value in config.items():
     globals()[key] = value
 
 
-print("Load prepared dataloaders & vocabulary...")
+print("Load prepared dataloaders & tokenizers...")
 dataloaders_fpath = "/".join([checkpoint["dir"], checkpoint["dataloaders"]])
 dataloaders = torch.load(dataloaders_fpath)
 train_loader = dataloaders["train_loader"]
@@ -102,7 +105,7 @@ for epoch in range(begin_epoch, total_epoch+1):
                                      criterion, clip)
       valid_loss = model_utils.evaluate(model, valid_loader, criterion)
       valid_BLEU = bleu.calculate_dataloader_bleu(valid_loader, src_tok, tgt_tok, 
-                                                  model, device, max_len=256, 
+                                                  model, device, max_len=max_len, 
                                                   teacher_forcing=True) * 100
       epoch_mins, epoch_secs = timer.get_time()
 

@@ -7,14 +7,14 @@ class Seq2Seq(nn.Module):
                  encoder,
                  decoder,
                  src_pad_idx,
-                 trg_pad_idx,
+                 tgt_pad_idx,
                  device):
         super().__init__()
 
         self.encoder = encoder
         self.decoder = decoder
         self.src_pad_idx = src_pad_idx
-        self.trg_pad_idx = trg_pad_idx
+        self.tgt_pad_idx = tgt_pad_idx
         self.device = device
 
     def make_src_mask(self, src):
@@ -27,44 +27,44 @@ class Seq2Seq(nn.Module):
 
         return src_mask
 
-    def make_trg_mask(self, trg):
+    def make_tgt_mask(self, tgt):
 
-        #trg = [batch size, trg len]
+        #tgt = [batch size, tgt len]
 
-        trg_pad_mask = (trg != self.trg_pad_idx).unsqueeze(1).unsqueeze(2)
+        tgt_pad_mask = (tgt != self.tgt_pad_idx).unsqueeze(1).unsqueeze(2)
 
-        #trg_pad_mask = [batch size, 1, 1, trg len]
+        #tgt_pad_mask = [batch size, 1, 1, tgt len]
 
-        trg_len = trg.shape[1]
+        tgt_len = tgt.shape[1]
 
-        trg_sub_mask = torch.tril(torch.ones((trg_len, trg_len), device = self.device)).bool()
+        tgt_sub_mask = torch.tril(torch.ones((tgt_len, tgt_len), device = self.device)).bool()
 
-        #trg_sub_mask = [trg len, trg len]
+        #tgt_sub_mask = [tgt len, tgt len]
 
-        trg_mask = trg_pad_mask & trg_sub_mask
+        tgt_mask = tgt_pad_mask & tgt_sub_mask
 
-        #trg_mask = [batch size, 1, trg len, trg len]
+        #tgt_mask = [batch size, 1, tgt len, tgt len]
 
-        return trg_mask
+        return tgt_mask
 
-    def forward(self, src, trg):
+    def forward(self, src, tgt):
 
         #src = [batch size, src len]
-        #trg = [batch size, trg len]
+        #tgt = [batch size, tgt len]
 
         src_mask = self.make_src_mask(src)
-        trg_mask = self.make_trg_mask(trg)
+        tgt_mask = self.make_tgt_mask(tgt)
 
         #src_mask = [batch size, 1, 1, src len]
-        #trg_mask = [batch size, 1, trg len, trg len]
+        #tgt_mask = [batch size, 1, tgt len, tgt len]
 
         enc_src = self.encoder(src, src_mask)
 
         #enc_src = [batch size, src len, hid dim]
 
-        output, attention = self.decoder(trg, enc_src, trg_mask, src_mask)
+        output, attention = self.decoder(tgt, enc_src, tgt_mask, src_mask)
 
-        #output = [batch size, trg len, output dim]
-        #attention = [batch size, n heads, trg len, src len]
+        #output = [batch size, tgt len, output dim]
+        #attention = [batch size, n heads, tgt len, src len]
 
         return output, attention

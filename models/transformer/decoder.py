@@ -24,39 +24,39 @@ class DecoderLayer(nn.Module):
                                                                      dropout)
         self.dropout = nn.Dropout(dropout)
 
-    def forward(self, trg, enc_src, trg_mask, src_mask):
+    def forward(self, tgt, enc_src, tgt_mask, src_mask):
 
-        #trg = [batch size, trg len, hid dim]
+        #tgt = [batch size, tgt len, hid dim]
         #enc_src = [batch size, src len, hid dim]
-        #trg_mask = [batch size, 1, trg len, trg len]
+        #tgt_mask = [batch size, 1, tgt len, tgt len]
         #src_mask = [batch size, 1, 1, src len]
 
         #self attention
-        _trg, _ = self.self_attention(trg, trg, trg, trg_mask)
+        _tgt, _ = self.self_attention(tgt, tgt, tgt, tgt_mask)
 
         #dropout, residual connection and layer norm
-        trg = self.self_attn_layer_norm(trg + self.dropout(_trg))
+        tgt = self.self_attn_layer_norm(tgt + self.dropout(_tgt))
 
-        #trg = [batch size, trg len, hid dim]
+        #tgt = [batch size, tgt len, hid dim]
 
         #encoder attention
-        _trg, attention = self.encoder_attention(trg, enc_src, enc_src, src_mask)
+        _tgt, attention = self.encoder_attention(tgt, enc_src, enc_src, src_mask)
 
         #dropout, residual connection and layer norm
-        trg = self.enc_attn_layer_norm(trg + self.dropout(_trg))
+        tgt = self.enc_attn_layer_norm(tgt + self.dropout(_tgt))
 
-        #trg = [batch size, trg len, hid dim]
+        #tgt = [batch size, tgt len, hid dim]
 
         #positionwise feedforward
-        _trg = self.positionwise_feedforward(trg)
+        _tgt = self.positionwise_feedforward(tgt)
 
         #dropout, residual and layer norm
-        trg = self.ff_layer_norm(trg + self.dropout(_trg))
+        tgt = self.ff_layer_norm(tgt + self.dropout(_tgt))
 
-        #trg = [batch size, trg len, hid dim]
-        #attention = [batch size, n heads, trg len, src len]
+        #tgt = [batch size, tgt len, hid dim]
+        #attention = [batch size, n heads, tgt len, src len]
 
-        return trg, attention
+        return tgt, attention
     
 
 class Decoder(nn.Module):
@@ -89,32 +89,32 @@ class Decoder(nn.Module):
 
         self.scale = torch.sqrt(torch.FloatTensor([hid_dim])).to(device)
 
-    def forward(self, trg, enc_src, trg_mask, src_mask):
+    def forward(self, tgt, enc_src, tgt_mask, src_mask):
 
-        #trg = [batch size, trg len]
+        #tgt = [batch size, tgt len]
         #enc_src = [batch size, src len, hid dim]
-        #trg_mask = [batch size, 1, trg len, trg len]
+        #tgt_mask = [batch size, 1, tgt len, tgt len]
         #src_mask = [batch size, 1, 1, src len]
 
-        batch_size = trg.shape[0]
-        trg_len = trg.shape[1]
+        batch_size = tgt.shape[0]
+        tgt_len = tgt.shape[1]
 
-        pos = torch.arange(0, trg_len).unsqueeze(0).repeat(batch_size, 1).to(self.device)
+        pos = torch.arange(0, tgt_len).unsqueeze(0).repeat(batch_size, 1).to(self.device)
 
-        #pos = [batch size, trg len]
+        #pos = [batch size, tgt len]
 
-        trg = self.dropout((self.tok_embedding(trg) * self.scale) + self.pos_embedding(pos))
+        tgt = self.dropout((self.tok_embedding(tgt) * self.scale) + self.pos_embedding(pos))
 
-        #trg = [batch size, trg len, hid dim]
+        #tgt = [batch size, tgt len, hid dim]
 
         for layer in self.layers:
-            trg, attention = layer(trg, enc_src, trg_mask, src_mask)
+            tgt, attention = layer(tgt, enc_src, tgt_mask, src_mask)
 
-        #trg = [batch size, trg len, hid dim]
-        #attention = [batch size, n heads, trg len, src len]
+        #tgt = [batch size, tgt len, hid dim]
+        #attention = [batch size, n heads, tgt len, src len]
 
-        output = self.fc_out(trg)
+        output = self.fc_out(tgt)
 
-        #output = [batch size, trg len, output dim]
+        #output = [batch size, tgt len, output dim]
 
         return output, attention

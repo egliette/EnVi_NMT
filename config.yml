@@ -23,7 +23,7 @@ checkpoint:
 
 # training hyperparameters
 batch_size: 32
-total_epoch: 50
+total_epoch: 5
 
 clip: 1.0
 

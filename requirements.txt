@@ -1,4 +1,6 @@
 torch
-nltk
+spacy
 pyvi
 tqdm
+pandas
+pyyaml

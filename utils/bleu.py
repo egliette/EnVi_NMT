@@ -1,6 +1,10 @@
 import math
 from collections import Counter
 
+from tqdm import tqdm
+
+from utils.model_utils import translate_sentence, translate_tensor_teacher_forcing
+
 
 def count_n_gram(tokens, n):
     return Counter([tuple(tokens[i:i + n]) for i in range(len(tokens) + 1 - n)])
@@ -40,3 +44,33 @@ def calculate_bleu(pred_sents, tgt_sents):
 
     bleu = brevity_penalty * geometric_mean
     return bleu
+
+def calculate_dataloader_bleu(dataloader, src_tok, tgt_tok, model, device, max_len=256,
+                   teacher_forcing=False):
+
+    dataset = dataloader.dataset
+    tgts = []
+    pred_tgts = []
+    another_tgts = list()
+
+    for data in tqdm(dataset):
+        src_tokens = src_tok.vocab.tensor2words(data["src"])
+        tgt_tokens = tgt_tok.vocab.tensor2words(data["tgt"])
+
+        if teacher_forcing:
+            pred_tgt = translate_tensor_teacher_forcing(data["src"], data["tgt"],
+                                                        tgt_tok, model, device, max_len)
+        else:
+            pred_tgt, _ = translate_sentence(src_tokens, src_tok, tgt_tok, 
+                                             model, device, max_len)
+            # cut off <eos> token
+            pred_tgt = pred_tgt[:-1]
+
+        # cut off <bos> and <eos> tokens
+        tgt_tokens = tgt_tokens[1:-1]
+
+        pred_tgts.append(pred_tgt)
+        tgts.append([tgt_tokens])
+        another_tgts.append(tgt_tokens)
+
+    return calculate_bleu(pred_tgts, another_tgts)

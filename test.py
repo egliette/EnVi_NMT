@@ -63,7 +63,7 @@ criterion = nn.CrossEntropyLoss(ignore_index=tgt_pad_id)
 
 print("Load the best checkpoint...")
 best_checkpoint_fpath = "/".join([checkpoint["dir"], checkpoint["best"]])
-checkpoint_dict = torch.load(checkpoint_fpath)
+checkpoint_dict = torch.load(best_checkpoint_fpath)
 model.load_state_dict(checkpoint_dict["model_state_dict"])
 
 print(f"The model has {model_utils.count_parameters(model):,} trainable parameters")

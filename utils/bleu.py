@@ -3,7 +3,7 @@ from collections import Counter
 
 from tqdm import tqdm
 
-from utils.model_utils import translate_sentence, translate_tensor_teacher_forcing
+import utils.model_utils as model_utils
 
 
 def count_n_gram(tokens, n):
@@ -52,15 +52,15 @@ def calculate_dataloader_bleu(dataloader, src_tok, tgt_tok, model, device,
     pred_sents = list()
     tgt_sents = list()
 
-    for data in tqdm(dataset, desc ="BLEU calculating"):
+    for data in tqdm(dataset, desc ="BLEU calculating", disable=print_pair):
         src_tokens = src_tok.vocab.tensor2words(data["src"])
         tgt_tokens = tgt_tok.vocab.tensor2words(data["tgt"])
 
         if teacher_forcing:
-            pred_tokens = translate_tensor_teacher_forcing(data["src"], data["tgt"],
+            pred_tokens = model_utils.translate_tensor_teacher_forcing(data["src"], data["tgt"],
                                                         tgt_tok, model, device, max_len)
         else:
-            pred_tokens, _ = translate_sentence(src_tokens, src_tok, tgt_tok, 
+            pred_tokens, _ = model_utils.translate_sentence(src_tokens, src_tok, tgt_tok, 
                                              model, device, max_len)
             # cut off <eos> token
             pred_tokens = pred_tokens[:-1]
@@ -76,6 +76,7 @@ def calculate_dataloader_bleu(dataloader, src_tok, tgt_tok, model, device,
             print("Source:", " ".join(src_tokens))
             print("Target:", " ".join(tgt_tokens))
             print("Predict:", " ".join(pred_tokens))
-            print("BLEU:", calculate_bleu([pred_tokens], [tgt_tokens]))
+            print("BLEU:", calculate_bleu([pred_tokens], [tgt_tokens]) * 100)
+            print("-" * 79)
 
     return calculate_bleu(pred_sents, tgt_sents)

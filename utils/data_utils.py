@@ -47,7 +47,7 @@ def tokenize_and_remove_invalid_sents(src_sents, tgt_sents, max_sent_len,
     tgt_tokenized_sents = list()
 
     total_lines = len(src_sents)
-    for i in tqdm(range(total_lines)):
+    for i in tqdm(range(total_lines), desc="Read lines"):
         src_tokenized_s = src_tokenize_func(src_sents[i])
         tgt_tokenized_s = tgt_tokenize_func(tgt_sents[i])
         if (is_sent_valid(src_tokenized_s, max_sent_len) and

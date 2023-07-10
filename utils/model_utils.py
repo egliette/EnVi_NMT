@@ -139,5 +139,5 @@ def test(model, test_loader, criterion, src_tok, tgt_tok, max_len):
                                                teacher_forcing=False, 
                                                print_pair=True) * 100
     
-    print(f"\tVal Loss: {test_loss:.3f} |  Val PPL: {math.exp(test_loss):7.3f}")
+    print(f"Test Loss: {test_loss:.3f} |  Test PPL: {math.exp(test_loss):7.3f}")
     print(f"TOTAL BLEU SCORE = {test_BLEU}")

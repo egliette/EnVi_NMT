@@ -1,3 +1,6 @@
+import os
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3" 
+
 import torch
 from torch.utils.data import DataLoader
 

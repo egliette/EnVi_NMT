@@ -1,9 +1,11 @@
+import os
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3" 
+
 import torch
 from torch import nn
 
 import utils.data_utils as data_utils
 import utils.model_utils as model_utils
-
 from models.transformer.encoder import Encoder
 from models.transformer.decoder import Decoder
 from models.transformer.seq2seq import Seq2Seq

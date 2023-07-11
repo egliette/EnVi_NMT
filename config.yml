@@ -40,4 +40,3 @@ init_lr: !!float 5e-4
 
 # testing
 beam_size: 1
-acceptable_delta: 2

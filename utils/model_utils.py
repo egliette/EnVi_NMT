@@ -108,9 +108,6 @@ def translate_sentence_beam_search(sent, src_tok, tgt_tok, model, device,
         pred_sents.append((pred_tokens, log))
 
     pred_sents = sorted(pred_sents, key=lambda c: c[1], reverse=True)
-    for i, (tokens, log) in enumerate(pred_sents):
-        print(f"Predict {i+1} - log={log:.2f}:", " ".join(tokens))
-
     return pred_sents
 
 def translate_tensor_teacher_forcing(src_tensor, tgt_tensor, tgt_tok,

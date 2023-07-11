@@ -98,8 +98,8 @@ def calculate_dataloader_bleu(dataloader, src_tok, tgt_tok, model,
             print("Source:", " ".join(src_tokens))
             print("Target:", " ".join(tgt_tokens))
             if beam_size > 1:
-                for i, (tokens, score) in enumerate(candidates):
-                    print(f"Predict {i+1} - score={score:.2f}:", " ".join(tokens))
+                for i, (tokens, log) in enumerate(candidates):
+                    print(f"Predict {i+1} - log={log:.2f}:", " ".join(tokens))
             else:
                 print("Predict:", " ".join(pred_tokens))
             print("BLEU:", calculate_bleu([pred_tokens], [tgt_tokens]) * 100)

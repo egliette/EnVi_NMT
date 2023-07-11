@@ -70,7 +70,8 @@ print(f"The model has {model_utils.count_parameters(model):,} trainable paramete
 
 
 print("Start testing...")
-model_utils.test(model, test_loader, criterion, src_tok, tgt_tok, max_len, beam_size)
+model_utils.test(model, test_loader, criterion, src_tok, tgt_tok, max_len, 
+                 beam_size, acceptable_delta)
 
 
 print("Finish testing!")

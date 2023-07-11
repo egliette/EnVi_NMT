@@ -47,7 +47,7 @@ def calculate_bleu(pred_sents, tgt_sents):
 
 def calculate_dataloader_bleu(dataloader, src_tok, tgt_tok, model, device,
                               max_len=256, teacher_forcing=False,
-                              print_pair=False, beam_size=1):
+                              print_pair=False, beam_size=1, acceptable_delta=2):
 
     dataset = dataloader.dataset
     total = len(dataset)
@@ -72,7 +72,8 @@ def calculate_dataloader_bleu(dataloader, src_tok, tgt_tok, model, device,
                                                                     model, 
                                                                     device, 
                                                                     max_len, 
-                                                                    beam_size)
+                                                                    beam_size,
+                                                                    acceptable_delta)
             # cut off <bos> and <eos> tokens
             candidates = [(tokens[1:-1], score) for tokens, score in candidates]
             pred_tokens = candidates[0][0]

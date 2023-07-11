@@ -16,7 +16,7 @@ def initialize_weights(m):
     if hasattr(m, "weight") and m.weight.dim() > 1:
         nn.init.xavier_uniform_(m.weight.data)
 
-def translate_sentence(sent, src_tok, tgt_tok, model, device, max_len = 256):
+def translate_sentence(sent, src_tok, tgt_tok, model, device, max_len=256):
     model.eval()
 
     if isinstance(sent, str):
@@ -53,7 +53,7 @@ def get_score(log_prob, pred_len, src_len, acceptable_delta=2):
     return - log_prob / length_penalty
 
 def translate_sentence_beam_search(sent, src_tok, tgt_tok, model, device, 
-                                   max_len=256, beam_size=1):
+                                   max_len=256, beam_size=1, acceptable_delta=2):
     model.eval()
 
     if isinstance(sent, str):
@@ -97,7 +97,9 @@ def translate_sentence_beam_search(sent, src_tok, tgt_tok, model, device,
                     new_candidate_list.append(new_candidate)
 
         sorted_candidate_list = sorted(new_candidate_list,
-                                       key=lambda c: get_score(c[1], len(c[0]), len(src_tokens)),
+                                       key=lambda c: get_score(c[1], len(c[0]), 
+                                                               len(src_tokens), 
+                                                               acceptable_delta),
                                        reverse=False)
         candidate_list = sorted_candidate_list[:beam_size-len(completed_candidates)]
 
@@ -106,7 +108,7 @@ def translate_sentence_beam_search(sent, src_tok, tgt_tok, model, device,
     pred_sents = list()
     for candidates, log in completed_candidates:
         pred_tensor = torch.Tensor(candidates)
-        score = get_score(log, len(candidates), len(src_tokens))
+        score = get_score(log, len(candidates), len(src_tokens), acceptable_delta)
         pred_tokens = tgt_tok.vocab.tensor2words(pred_tensor)
         pred_sents.append((pred_tokens, score))
 
@@ -198,15 +200,17 @@ def evaluate(model, loader, criterion):
 
     return epoch_loss / len(loader)
 
-def test(model, test_loader, criterion, src_tok, tgt_tok, max_len, beam_size=1):
+def test(model, test_loader, criterion, src_tok, tgt_tok, max_len, beam_size=1,
+         acceptable_delta=2):
     device = model.device
 
     test_loss = model_utils.evaluate(model, test_loader, criterion)
     test_BLEU = bleu.calculate_dataloader_bleu(test_loader, src_tok, tgt_tok,
-                                          model, device, max_len=max_len,
-                                          teacher_forcing=False,
-                                          print_pair=True,
-                                          beam_size=beam_size) * 100
+                                               model, device, max_len,
+                                               teacher_forcing=False,
+                                               print_pair=True,
+                                               beam_size=beam_size,
+                                               acceptable_delta=acceptable_delta) * 100
 
     print(f"Test Loss: {test_loss:.3f} |  Test PPL: {math.exp(test_loss):7.3f}")
     print(f"TOTAL BLEU SCORE = {test_BLEU}")

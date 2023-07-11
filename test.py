@@ -4,7 +4,6 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 import torch
 from torch import nn
 
-import utils.bleu as bleu
 import utils.data_utils as data_utils
 import utils.model_utils as model_utils
 from models.transformer.encoder import Encoder
@@ -71,7 +70,7 @@ print(f"The model has {model_utils.count_parameters(model):,} trainable paramete
 
 
 print("Start testing...")
-bleu.test(model, test_loader, criterion, src_tok, tgt_tok, max_len, beam_size)
+model_utils.test(model, test_loader, criterion, src_tok, tgt_tok, max_len, beam_size)
 
 
 print("Finish testing!")

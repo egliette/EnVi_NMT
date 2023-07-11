@@ -37,3 +37,6 @@ drop_prob: 0.1
 
 # optimizer
 init_lr: !!float 5e-4
+
+# testing
+beam_size: 1

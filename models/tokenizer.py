@@ -15,15 +15,9 @@ class BaseTokenizer(ABC):
     def tokenize(self):
         pass
 
-    def tokenize_sents(self, sents):
-        results = list()
-        for s in sents:
-            results.append(self.tokenize(s))
-        return results
-
     def train_vocab(self, sents, is_tokenized=False, min_freq=1):
         if not is_tokenized:
-            tokenized_sents = self.tokenize_sents(sents)
+            tokenized_sents = self.tokenize(sents)
         else:
             tokenized_sents = sents
         self.vocab.add_words(tokenized_sents, min_freq)

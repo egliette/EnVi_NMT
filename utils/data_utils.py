@@ -36,13 +36,26 @@ def read_sents(fpath, is_lowercase=False):
     else:
         return sents
 
-def is_sent_valid(tokenized_sent, max_sent_len):
+def is_sent_valid(tokenized_sent, max_len):
     sent_len = len(tokenized_sent)
-    return (sent_len < max_sent_len and sent_len > 0)
+    return (sent_len < max_len and sent_len > 0)
 
-
-def tokenize_and_remove_invalid_sents(src_sents, tgt_sents, max_sent_len,
+def tokenize_and_remove_invalid_sents(src_sents, tgt_sents, max_len,
                                       src_tokenize_func, tgt_tokenize_func):
+    '''
+        Tokenize sentences, count number of tokens to remove invalid sentences
+        Parameters:
+            src_sents (list(str)): list of source sentence strings
+            tgt_sents (list(str)): list of target sentence strings
+            max_len (int): maximum number of tokens for each sentence
+            src_tokenize_func (function): tokenizing function for source language
+            tgt_tokenize_func (function): tokenizing function for target language
+        Returns:
+            src_tokenized_sents (list(list(str))): list of valid source sentences,
+                                                   each sentence is a list of tokens
+            tgt_tokenized_sents (list(list(str))): list of valid target sentences,
+                                                   each sentence is a list of tokens
+    '''
     src_tokenized_sents = list()
     tgt_tokenized_sents = list()
 
@@ -50,8 +63,8 @@ def tokenize_and_remove_invalid_sents(src_sents, tgt_sents, max_sent_len,
     for i in tqdm(range(total_lines), desc="Read lines"):
         src_tokenized_s = src_tokenize_func(src_sents[i])
         tgt_tokenized_s = tgt_tokenize_func(tgt_sents[i])
-        if (is_sent_valid(src_tokenized_s, max_sent_len) and
-            is_sent_valid(tgt_tokenized_s, max_sent_len)):
+        if (is_sent_valid(src_tokenized_s, max_len) and
+            is_sent_valid(tgt_tokenized_s, max_len)):
             src_tokenized_sents.append(src_tokenized_s)
             tgt_tokenized_sents.append(tgt_tokenized_s)
 

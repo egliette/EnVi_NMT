@@ -2,7 +2,10 @@ from torch.utils.data import Dataset
 
 
 class ParallelDataset(Dataset):
-    """Load dataset from source and target text files"""
+    '''
+        Load dataset from source and target text files
+        Each item is a dict of indexes tensors of source and target sentence pair
+    '''
 
     def __init__(self, src_tokenized_sents, tgt_tokenized_sents,
                  src_tokenizer, tgt_tokenizer, is_sorted=True):

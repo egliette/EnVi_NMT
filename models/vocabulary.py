@@ -7,10 +7,11 @@ from utils.data_utils import pad_tensor
 
 
 class Vocabulary:
-    """ The Vocabulary class heavily inspired by machine translation exercise of
-        cs224n is used to record words, which are used to convert text to numbers
-        and vice versa.
-    """
+    ''' 
+        The Vocabulary class heavily inspired by machine translation exercise 
+        of cs224n is used to record words from corpus. The recorded words are 
+        used to convert text to numbers and vice versa.
+    '''
 
     def __init__(self):
         self.unk_token = "<unk>"
@@ -38,17 +39,9 @@ class Vocabulary:
         return len(self.word2id)
 
     def id2word(self, word_index):
-        """
-        @param word_index (int)
-        @return word (str)
-        """
         return self.id2word[word_index]
 
     def add(self, word):
-        """ Add word to vocabulary
-        @param word (str)
-        @return index (str): index of the word just added
-        """
         if word not in self:
             word_index = self.word2id[word] = len(self.word2id)
             self.id2word[word_index] = word
@@ -87,9 +80,11 @@ class Vocabulary:
         for word in non_singletons:
             self.add(word)
 
-
 class ParallelVocabulary:
-
+    '''
+        Created from two Vocabulary of source and target languages
+        Used to create collate_fn for DataLoader
+    '''
     def __init__(self, src_vocab, tgt_vocab, is_sorted, device):
         self.src = src_vocab
         self.tgt = tgt_vocab

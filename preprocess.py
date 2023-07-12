@@ -1,3 +1,4 @@
+# Stop printing tensorflow's logs
 import os
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3" 
 
@@ -12,7 +13,30 @@ import utils.other_utils as other_utils
 
 
 def load_dataloader_from_fpath(pair_fpath, src_tok, tgt_tok, batch_size, max_len,
-                               device, is_lowercase=True, is_train=False, is_sorted=True):
+                               device, is_lowercase=True, is_train=False):
+    ''' 
+        Create dataloaders from source and target language data files, 
+        train tokenizers (optional).
+        Parameters:
+            pair_fpath (dict{str: str}): source and target language data filepaths
+            src_tok (BaseTokenizer): tokenizer for source language
+            tgt_tok (BaseTokenizer): tokenizer for target language
+            batch_size (int): number of sentence pairs of each batch
+            max_len (int): maximum number of tokens for each sentence
+            device (torch.device): cpu or cuda
+            is_lowercase (bool): convert sentence into lower case
+            is_train (bool): if datasets are used for training, shuffle DataLoader
+                             and train the tokenizers. If not, sort datasets and
+                             DataLoader and skip training the tokenizers
+        Returns:
+            loader (DataLoader): DataLoader where each data is pair of source
+                                 and target indexes tensors
+            src_tok (BaseTokenizer) (if is_train == True): trained tokenizer 
+                                                           for source language
+            tgt_tok (BaseTokenizer) (if is_train == True): trained tokenizer 
+                                                           for target language
+              
+    '''
     src_sents = data_utils.read_sents(pair_fpath["src"], is_lowercase)
     tgt_sents = data_utils.read_sents(pair_fpath["tgt"], is_lowercase)
     src_tok_sents, tgt_tok_sents = data_utils.tokenize_and_remove_invalid_sents(src_sents,
@@ -41,6 +65,7 @@ def load_dataloader_from_fpath(pair_fpath, src_tok, tgt_tok, batch_size, max_len
     else:
         return loader
 
+##############################################################################
 
 print("Load config file...")
 config = data_utils.get_config("config.yml")

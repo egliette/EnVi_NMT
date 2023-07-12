@@ -1,10 +1,6 @@
 import math
 from collections import Counter
 
-from tqdm import tqdm
-
-import utils.model_utils as model_utils
-
 
 def count_n_gram(tokens, n):
     return Counter([tuple(tokens[i:i + n]) for i in range(len(tokens) + 1 - n)])
@@ -26,6 +22,16 @@ def precision_i(pred_sents, tgt_sents, i):
     return total_matched_i_grams / total_pred_i_grams
 
 def calculate_bleu(pred_sents, tgt_sents):
+    '''
+        Calculate BLEU score based on https://en.wikipedia.org/wiki/BLEU
+        Parameters:
+            pred_sents (list(list(str))): list of predicted sentences,
+                                          each sentence is a list of tokens
+            tgt_sents (list(list(str))): list of target sentences,
+                                         each sentence is a list of tokens
+        Returns:
+            bleu (float): BLEU score
+    '''
     n_gram_overlap = 0
 
     for i in range(1, 5):
@@ -44,65 +50,3 @@ def calculate_bleu(pred_sents, tgt_sents):
 
     bleu = brevity_penalty * geometric_mean
     return bleu
-
-def calculate_dataloader_bleu(dataloader, src_tok, tgt_tok, model, 
-                              device, max_len=256, teacher_forcing=False,
-                              print_pair=False, beam_size=1):
-
-    dataset = dataloader.dataset
-    total = len(dataset)
-    pred_sents = list()
-    tgt_sents = list()
-
-    for i, data in tqdm(enumerate(dataset), desc ="BLEU calculating", disable=print_pair):
-        src_tokens = src_tok.vocab.tensor2words(data["src"])
-        tgt_tokens = tgt_tok.vocab.tensor2words(data["tgt"])
-        
-        if teacher_forcing:
-            pred_tokens = model_utils.translate_tensor_teacher_forcing(data["src"], 
-                                                                       data["tgt"],
-                                                                       tgt_tok, 
-                                                                       model, 
-                                                                       device, 
-                                                                       max_len)
-        elif beam_size > 1:
-            candidates = model_utils.translate_sentence_beam_search(src_tokens,
-                                                                    src_tok, 
-                                                                    tgt_tok,
-                                                                    model, 
-                                                                    device, 
-                                                                    max_len, 
-                                                                    beam_size)
-            # cut off <bos> and <eos> tokens
-            candidates = [(tokens[1:-1], score) for tokens, score in candidates]
-            pred_tokens = candidates[0][0]
-        else:
-            pred_tokens, _ = model_utils.translate_sentence(src_tokens,
-                                                            src_tok, 
-                                                            tgt_tok,
-                                                            model, 
-                                                            device, 
-                                                            max_len)
-            # cut off <eos> token
-            pred_tokens = pred_tokens[:-1]
-
-        # cut off <bos> and <eos> tokens
-        tgt_tokens = tgt_tokens[1:-1]
-        src_tokens = src_tokens[1:-1]
-
-        pred_sents.append(pred_tokens)
-        tgt_sents.append(tgt_tokens)
-
-        if print_pair:
-            print(f"{i}/{total}")
-            print("Source:", " ".join(src_tokens))
-            print("Target:", " ".join(tgt_tokens))
-            if beam_size > 1:
-                for i, (tokens, log) in enumerate(candidates):
-                    print(f"Predict {i+1} - log={log:.2f}:", " ".join(tokens))
-            else:
-                print("Predict:", " ".join(pred_tokens))
-            print("BLEU:", calculate_bleu([pred_tokens], [tgt_tokens]) * 100)
-            print("-" * 79)
-
-    return calculate_bleu(pred_sents, tgt_sents)

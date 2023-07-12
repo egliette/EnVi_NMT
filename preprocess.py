@@ -2,14 +2,16 @@
 import os
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3" 
 
+import argparse
+
 import torch
 from torch.utils.data import DataLoader
 
+import utils.data_utils as data_utils
+import utils.other_utils as other_utils
 from models.parallel_dataset import ParallelDataset
 from models.tokenizer import EnTokenizer, ViTokenizer
 from models.vocabulary import ParallelVocabulary
-import utils.data_utils as data_utils
-import utils.other_utils as other_utils
 
 
 def load_dataloader_from_fpath(pair_fpath, src_tok, tgt_tok, batch_size, max_len,
@@ -65,54 +67,66 @@ def load_dataloader_from_fpath(pair_fpath, src_tok, tgt_tok, batch_size, max_len
     else:
         return loader
 
-##############################################################################
+def main(config_fpath="config.yml"):
+    print("Load config file...")
+    config = data_utils.get_config("config.yml")
+    for key, value in config.items():
+        globals()[key] = value
 
-print("Load config file...")
-config = data_utils.get_config("config.yml")
-for key, value in config.items():
-    globals()[key] = value
+    print("Load tokenizers...")
+    src_tok = EnTokenizer()
+    tgt_tok = ViTokenizer()
 
-print("Load tokenizers...")
-src_tok = EnTokenizer()
-tgt_tok = ViTokenizer()
+    print("Load DataLoaders")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    train_loader, src_tok, tgt_tok = load_dataloader_from_fpath(path["train"],
+                                                                src_tok,
+                                                                tgt_tok,
+                                                                batch_size,
+                                                                max_len,
+                                                                device,
+                                                                is_lowercase=True,
+                                                                is_train=True)
+    valid_loader = load_dataloader_from_fpath(path["valid"],
+                                            src_tok,
+                                            tgt_tok,
+                                            batch_size,
+                                            max_len,
+                                            device,
+                                            is_lowercase=True,
+                                            is_train=False)
+    test_loader = load_dataloader_from_fpath(path["test"],
+                                            src_tok,
+                                            tgt_tok,
+                                            batch_size,
+                                            max_len,
+                                            device,
+                                            is_lowercase=True,
+                                            is_train=False)
 
-print("Load DataLoaders")
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-train_loader, src_tok, tgt_tok = load_dataloader_from_fpath(path["train"],
-                                                            src_tok,
-                                                            tgt_tok,
-                                                            batch_size,
-                                                            max_len,
-                                                            device,
-                                                            is_lowercase=True,
-                                                            is_train=True)
-valid_loader = load_dataloader_from_fpath(path["valid"],
-                                          src_tok,
-                                          tgt_tok,
-                                          batch_size,
-                                          max_len,
-                                          device,
-                                          is_lowercase=True,
-                                          is_train=False)
-test_loader = load_dataloader_from_fpath(path["test"],
-                                         src_tok,
-                                         tgt_tok,
-                                         batch_size,
-                                         max_len,
-                                         device,
-                                         is_lowercase=True,
-                                         is_train=False)
+    dataloaders = {"train_loader": train_loader,
+                "valid_loader": valid_loader,
+                "test_loader": test_loader}
 
-dataloaders = {"train_loader": train_loader,
-               "valid_loader": valid_loader,
-               "test_loader": test_loader}
+    print("Load file paths and save...")
+    other_utils.create_dir(checkpoint["dir"])
+    src_tok_fpath = "/".join([checkpoint["dir"], checkpoint["tokenizer"]["src"]])
+    tgt_tok_fpath = "/".join([checkpoint["dir"], checkpoint["tokenizer"]["tgt"]])
+    dataloaders_fpath = "/".join([checkpoint["dir"], checkpoint["dataloaders"]])
 
-print("Load file paths and save...")
-other_utils.create_dir(checkpoint["dir"])
-src_tok_fpath = "/".join([checkpoint["dir"], checkpoint["tokenizer"]["src"]])
-tgt_tok_fpath = "/".join([checkpoint["dir"], checkpoint["tokenizer"]["tgt"]])
-dataloaders_fpath = "/".join([checkpoint["dir"], checkpoint["dataloaders"]])
+    torch.save(src_tok, src_tok_fpath)
+    torch.save(tgt_tok, tgt_tok_fpath)
+    torch.save(dataloaders, dataloaders_fpath)
 
-torch.save(src_tok, src_tok_fpath)
-torch.save(tgt_tok, tgt_tok_fpath)
-torch.save(dataloaders, dataloaders_fpath)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Preprocess parallel datasets and train tokenizers")
+
+    parser.add_argument("--config", 
+                        default="config.yml", 
+                        help="path to config file",
+                        dest="config_fpath")
+    
+    args = parser.parse_args()
+
+    main(**vars(args))

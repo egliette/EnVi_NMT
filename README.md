@@ -1,4 +1,6 @@
 # English-to-Vietnamese Neural Machine Translation
+
+![Sample Image](assets/main.png)
 [![Python 3.10.7](https://img.shields.io/badge/python-3.10.7-blue)](https://www.python.org/downloads/release/python-3107/)
 [![PyTorch 2.0.1](https://img.shields.io/badge/PyTorch-2.0.1-red)](https://pypi.org/project/torch/2.0.1/)
 

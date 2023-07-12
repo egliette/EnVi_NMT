@@ -15,7 +15,7 @@ from models.transformer.seq2seq import Seq2Seq
 
 
 def main(config_fpath="config.yml"):
-    print("Load config file...")
+    print(f"Load config file {config_fpath}...")
     config = data_utils.get_config(config_fpath)
     for key, value in config.items():
         globals()[key] = value

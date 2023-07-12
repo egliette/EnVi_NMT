@@ -68,8 +68,8 @@ def load_dataloader_from_fpath(pair_fpath, src_tok, tgt_tok, batch_size, max_len
         return loader
 
 def main(config_fpath="config.yml"):
-    print("Load config file...")
-    config = data_utils.get_config("config.yml")
+    print(f"Load config file {config_fpath}...")
+    config = data_utils.get_config(config_fpath)
     for key, value in config.items():
         globals()[key] = value
 

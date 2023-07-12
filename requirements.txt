@@ -4,3 +4,4 @@ pyvi==0.1.1
 tqdm==4.65.0
 pandas==1.5.3
 pyyaml==6.0
+matplotlib

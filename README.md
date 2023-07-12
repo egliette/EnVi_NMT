@@ -5,6 +5,8 @@
 **Full pipeline notebook:**
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1-3j8lr99-aD2TDWYxaecIJ3VyHehc5Ct?usp=sharing)  
 
+**Google Colab Streamlit link:** [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1grZfoaD9SCfwOJi-QDOdGRJMlaekDY3f?usp=sharing) 
+
 English-Vietnamese Neural Machine Translation implementation from the scratch with PyTorch.
 
 ## 1. Setup 🧰
@@ -47,7 +49,23 @@ Alternatively, you can run the full pipeline with a single command using the fol
 bash full_pipeline.sh --config config.yml
 ```
 
-## 4. References 📝
+## 4. Inference with Streamlit 🚀
+
+To facilitate an intuitive interaction with your trained model, follow the steps below to host a web server using Streamlit:
+
+- Execute the command provided below to initiate the server:
+  ```bash
+  streamlit run inference_streamlit.py -- --config config.yml
+  ```
+  You have the option to replace `config.yml` with your customized configuration file.
+
+- If you prefer to test the server on Google Colab or do not have access to a GPU device, you can conveniently host your server there. Simply access the demo **Google Colab Streamlit link**: [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1grZfoaD9SCfwOJi-QDOdGRJMlaekDY3f?usp=sharing)  
+This link will allow you to utilize my trained model and tokenizers.
+
+Ensure that you have the necessary dependencies and libraries installed before running the Streamlit server. This will enable you to interact seamlessly with your trained model and explore its capabilities through a user-friendly web interface.
+
+
+## 5. References 📝
 - https://github.com/bentrevett/pytorch-seq2seq
 - https://github.com/pbcquoc/transformer 
 - https://web.stanford.edu/class/archive/cs/cs224n/cs224n.1214/ 

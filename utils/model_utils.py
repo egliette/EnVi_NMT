@@ -1,6 +1,8 @@
 import math
 
 from tqdm import tqdm
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -63,6 +65,31 @@ def translate_sentence(sent, src_tok, tgt_tok, model, device, max_len=256):
     pred_tokens = [tgt_tok.vocab.id2word[i] for i in pred_indexes]
 
     return pred_tokens, attention
+
+def display_attention(sentence, translation, attention, n_heads = 8, 
+                      n_rows = 4, n_cols = 2, fig_size=(15,25)):
+
+    assert n_rows * n_cols == n_heads
+
+    fig = plt.figure(figsize=fig_size)
+
+    for i in range(n_heads):
+
+        ax = fig.add_subplot(n_rows, n_cols, i+1)
+
+        _attention = attention.squeeze(0)[i].cpu().detach().numpy()
+
+        cax = ax.matshow(_attention, cmap='bone')
+
+        ax.tick_params(labelsize=12)
+        ax.set_xticklabels(['']+['<sos>']+[t.lower() for t in sentence]+['<eos>'],
+                           rotation=45)
+        ax.set_yticklabels(['']+translation)
+
+        ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
+        ax.yaxis.set_major_locator(ticker.MultipleLocator(1))
+
+    return fig
 
 def translate_sentence_beam_search(sent, src_tok, tgt_tok, model, device, 
                                    max_len=256, beam_size=1):

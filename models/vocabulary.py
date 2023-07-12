@@ -16,7 +16,7 @@ class Vocabulary:
     def __init__(self):
         self.unk_token = "<unk>"
         self.pad_token = "<pad>"
-        self.bos_token = "<sos>"
+        self.bos_token = "<bos>"
         self.eos_token = "<eos>"
         self.word2id = dict()
         self.word2id[self.unk_token] = 0

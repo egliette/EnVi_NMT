@@ -105,7 +105,7 @@ for epoch in range(begin_epoch, total_epoch+1):
       train_loss = model_utils.train(epoch, model, train_loader, optimizer, 
                                      criterion, clip)
       valid_loss = model_utils.evaluate(model, valid_loader, criterion)
-      valid_BLEU = bleu.calculate_dataloader_bleu(valid_loader, src_tok, tgt_tok, 
+      valid_BLEU = model_utils.calculate_dataloader_bleu(valid_loader, src_tok, tgt_tok, 
                                                   model, device, max_len=max_len, 
                                                   teacher_forcing=True) * 100
       epoch_mins, epoch_secs = timer.get_time()

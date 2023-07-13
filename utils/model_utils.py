@@ -82,7 +82,7 @@ def display_attention(src_tokens, pred_tokens, attention, n_heads = 8,
         cax = ax.matshow(_attention, cmap='bone')
 
         ax.tick_params(labelsize=12)
-        ax.set_xticklabels([''] + src_tokens)
+        ax.set_xticklabels([''] + src_tokens, rotation=90)
         ax.set_yticklabels([''] + pred_tokens)
 
         ax.xaxis.set_major_locator(ticker.MultipleLocator(1))

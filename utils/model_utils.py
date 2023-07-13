@@ -66,8 +66,8 @@ def translate_sentence(sent, src_tok, tgt_tok, model, device, max_len=256):
 
     return pred_tokens, attention
 
-def display_attention(sentence, translation, attention, n_heads = 8, 
-                      n_rows = 4, n_cols = 2, fig_size=(15,25)):
+def display_attention(src_tokens, pred_tokens, attention, n_heads = 8, 
+                      n_rows=4, n_cols=2, fig_size=(15,25)):
 
     assert n_rows * n_cols == n_heads
 
@@ -82,9 +82,8 @@ def display_attention(sentence, translation, attention, n_heads = 8,
         cax = ax.matshow(_attention, cmap='bone')
 
         ax.tick_params(labelsize=12)
-        ax.set_xticklabels(['']+['<sos>']+[t.lower() for t in sentence]+['<eos>'],
-                           rotation=45)
-        ax.set_yticklabels(['']+translation)
+        ax.set_xticklabels([''] + src_tokens)
+        ax.set_yticklabels([''] + pred_tokens)
 
         ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
         ax.yaxis.set_major_locator(ticker.MultipleLocator(1))

@@ -72,7 +72,6 @@ def add_bg_from_url():
          unsafe_allow_html=True
      )
 
-
 def main(config_fpath="config.yml"):
     config = data_utils.get_config(config_fpath)
     for key, value in config.items():
@@ -112,6 +111,7 @@ def main(config_fpath="config.yml"):
 
         st.header("Attention Matrix")
         src_tokens = [token.lower() for token in src_tok.tokenize(input_text)] 
+        src_tokens = [src_tok.vocab.bos_token] + src_tokens + [src_tok.vocab.eos_token]
         fig = model_utils.display_attention(src_tokens, pred_tokens[1:], 
                                             attention, n_heads=1, 
                                             n_rows=1, n_cols=1, fig_size=(5, 5))

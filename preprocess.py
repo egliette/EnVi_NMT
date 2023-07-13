@@ -75,7 +75,12 @@ def main(config_fpath="config.yml"):
 
     print("Load tokenizers...")
     src_tok = EnTokenizer()
-    tgt_tok = ViTokenizer()
+
+    # Vietnamese Multi-word Tokenizer
+    # tgt_tok = ViTokenizer()
+
+    # Vietnamese Word Tokenizer
+    tgt_tok = EnTokenizer()
 
     print("Load DataLoaders")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

@@ -359,13 +359,13 @@ def calculate_dataloader_bleu(loader, src_tok, tgt_tok, model, device, max_len=2
 
         if print_pair:
             print(f"{i}/{total}")
-            print("Source:", " ".join(src_tokens))
-            print("Target:", " ".join(tgt_tokens))
+            print("Source:", src_tok.detokenize(src_tokens))
+            print("Target:", tgt_tok.detokenize(tgt_tokens))
             if beam_size > 1:
                 for i, (tokens, log) in enumerate(candidates):
-                    print(f"Predict {i+1} - log={log:.2f}:", " ".join(tokens))
+                    print(f"Predict {i+1} - log={log:.2f}:", tgt_tok.detokenize(tokens))
             else:
-                print("Predict:", " ".join(pred_tokens))
+                print("Predict:", tgt_tok.detokenize(pred_tokens))
             print("BLEU:", bleu.calculate_bleu([pred_tokens], [tgt_tokens]) * 100)
             print("-" * 79)
 

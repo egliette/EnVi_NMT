@@ -12,7 +12,11 @@ class BaseTokenizer(ABC):
         self.vocab = Vocabulary()
 
     @abstractmethod
-    def tokenize(self):
+    def tokenize(self, sent):
+        pass
+    
+    @abstractmethod
+    def detokenize(self, tokens):
         pass
 
     def train_vocab(self, sents, is_tokenized=False, min_freq=1):
@@ -30,6 +34,9 @@ class ViTokenizer(BaseTokenizer):
             return list()
         else:
             return PyViTokenizer.spacy_tokenize(sentence)[0]
+        
+    def detokenize(self, tokens):
+        return " ".join(tokens)
 
 
 class EnTokenizer(BaseTokenizer):
@@ -40,3 +47,6 @@ class EnTokenizer(BaseTokenizer):
 
     def tokenize(self, sentence):
         return [tok.text for tok in self.spacy_en.tokenizer(sentence)]
+    
+    def detokenize(self, tokens):
+        return " ".join(tokens)

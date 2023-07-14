@@ -105,7 +105,7 @@ def main(config_fpath="config.yml"):
                                                                 model, device, 
                                                                 max_len)
 
-        translated_text = " ".join(pred_tokens[1:-1])
+        translated_text = tgt_tok.detokenize(pred_tokens[1:-1])
         output_text.text_area("Vietnamese Output Text", translated_text, height=200)
 
 

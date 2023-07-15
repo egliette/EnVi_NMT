@@ -16,8 +16,8 @@ checkpoint:
     last: "checkpoint_last.pt"
     results: "results.csv"
     tokenizer:
-        src: "src_tok.pt"
-        tgt: "tgt_tok.pt"
+        src: "src_tok.txt"
+        tgt: "tgt_tok.txt"
     dataloaders: "dataloaders.pt"
 
 

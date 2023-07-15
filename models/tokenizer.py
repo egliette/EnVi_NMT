@@ -37,7 +37,7 @@ class BaseTokenizer(ABC):
     def save_vocab(self, vocab_fpath):
         with open(vocab_fpath, "w") as f:
             for token in self.vocab.word2id.keys(): 
-                f.wwrite(token + ("\n"))
+                f.write(token + ("\n"))
 
 
 class ViTokenizer(BaseTokenizer):

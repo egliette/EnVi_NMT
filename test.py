@@ -27,10 +27,10 @@ def main(config_fpath="config.yml"):
     dataloaders = torch.load(dataloaders_fpath)
     test_loader = dataloaders["test_loader"]
 
-    src_tok_fpath = "/".join([checkpoint["dir"], checkpoint["tokenizer"]["src"]])
-    tgt_tok_fpath = "/".join([checkpoint["dir"], checkpoint["tokenizer"]["tgt"]])
-    src_tok = EnTokenizer(src_tok_fpath)
-    tgt_tok = EnTokenizer(tgt_tok_fpath)
+    src_vocab_fpath = "/".join([checkpoint["dir"], checkpoint["vocab"]["src"]])
+    tgt_vocab_fpath = "/".join([checkpoint["dir"], checkpoint["vocab"]["tgt"]])
+    src_tok = EnTokenizer(src_vocab_fpath)
+    tgt_tok = EnTokenizer(tgt_vocab_fpath)
 
 
     print("Load model...")

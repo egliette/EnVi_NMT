@@ -20,10 +20,10 @@ def load_tokenizers_and_model(config_fpath):
     for key, value in config.items():
         globals()[key] = value
 
-    src_tok_fpath = "/".join([checkpoint["dir"], checkpoint["tokenizer"]["src"]])
-    tgt_tok_fpath = "/".join([checkpoint["dir"], checkpoint["tokenizer"]["tgt"]])
-    src_tok = EnTokenizer(src_tok_fpath)
-    tgt_tok = EnTokenizer(tgt_tok_fpath)
+    src_vocab_fpath = "/".join([checkpoint["dir"], checkpoint["vocab"]["src"]])
+    tgt_vocab_fpath = "/".join([checkpoint["dir"], checkpoint["vocab"]["tgt"]])
+    src_tok = EnTokenizer(src_vocab_fpath)
+    tgt_tok = EnTokenizer(tgt_vocab_fpath)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

@@ -32,10 +32,10 @@ def main(config_fpath="config.yml"):
     train_loader = dataloaders["train_loader"]
     valid_loader = dataloaders["valid_loader"]
 
-    src_tok_fpath = "/".join([checkpoint["dir"], checkpoint["tokenizer"]["src"]])
-    tgt_tok_fpath = "/".join([checkpoint["dir"], checkpoint["tokenizer"]["tgt"]])
-    src_tok = EnTokenizer(src_tok_fpath)
-    tgt_tok = EnTokenizer(tgt_tok_fpath)
+    src_vocab_fpath = "/".join([checkpoint["dir"], checkpoint["vocab"]["src"]])
+    tgt_vocab_fpath = "/".join([checkpoint["dir"], checkpoint["vocab"]["tgt"]])
+    src_tok = EnTokenizer(src_vocab_fpath)
+    tgt_tok = EnTokenizer(tgt_vocab_fpath)
 
     print("Load model & optimizer & criterion...")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

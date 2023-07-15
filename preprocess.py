@@ -115,12 +115,12 @@ def main(config_fpath="config.yml"):
 
     print("Load file paths and save...")
     other_utils.create_dir(checkpoint["dir"])
-    src_tok_fpath = "/".join([checkpoint["dir"], checkpoint["tokenizer"]["src"]])
-    tgt_tok_fpath = "/".join([checkpoint["dir"], checkpoint["tokenizer"]["tgt"]])
+    src_vocab_fpath = "/".join([checkpoint["dir"], checkpoint["vocab"]["src"]])
+    tgt_vocab_fpath = "/".join([checkpoint["dir"], checkpoint["vocab"]["tgt"]])
     dataloaders_fpath = "/".join([checkpoint["dir"], checkpoint["dataloaders"]])
 
-    src_tok.save_vocab(src_tok_fpath)
-    tgt_tok.save_vocab(tgt_tok_fpath)
+    src_tok.save_vocab(src_vocab_fpath)
+    tgt_tok.save_vocab(tgt_vocab_fpath)
     torch.save(dataloaders, dataloaders_fpath)
 
 

@@ -15,9 +15,9 @@ checkpoint:
     best: "checkpoint_best.pt"
     last: "checkpoint_last.pt"
     results: "results.csv"
-    tokenizer:
-        src: "src_tok.txt"
-        tgt: "tgt_tok.txt"
+    vocab:
+        src: "src_vocab.txt"
+        tgt: "tgt_vocab.txt"
     dataloaders: "dataloaders.pt"
 
 

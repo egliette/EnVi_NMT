@@ -16,6 +16,7 @@ import utils.other_utils as other_utils
 from models.transformer.encoder import Encoder
 from models.transformer.decoder import Decoder
 from models.transformer.seq2seq import Seq2Seq
+from models.tokenizer import EnTokenizer, ViTokenizer
 
 
 def main(config_fpath="config.yml"):
@@ -33,9 +34,8 @@ def main(config_fpath="config.yml"):
 
     src_tok_fpath = "/".join([checkpoint["dir"], checkpoint["tokenizer"]["src"]])
     tgt_tok_fpath = "/".join([checkpoint["dir"], checkpoint["tokenizer"]["tgt"]])
-    src_tok = torch.load(src_tok_fpath)
-    tgt_tok = torch.load(tgt_tok_fpath)
-
+    src_tok = EnTokenizer(src_tok_fpath)
+    tgt_tok = EnTokenizer(tgt_tok_fpath)
 
     print("Load model & optimizer & criterion...")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

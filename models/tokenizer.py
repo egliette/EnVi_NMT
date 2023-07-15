@@ -54,7 +54,7 @@ class ViTokenizer(BaseTokenizer):
 
 class EnTokenizer(BaseTokenizer):
 
-    def __init__(self, vocab_fpath):
+    def __init__(self, vocab_fpath=None):
         super().__init__(vocab_fpath)
         self.spacy_en = spacy.load('en_core_web_sm')
 

@@ -136,7 +136,7 @@ def translate_sentence_beam_search(sent, src_tok, tgt_tok, model, device,
         # for each candidate, concatnate it with beam_size best next tokens
         # then add them to new_candidate_list
         for j in range(num_candidates):
-            pred_indexes, candidate_score = candidate_list[j]
+            pred_indexes, candidate_log = candidate_list[j]
             pred_tensor = torch.LongTensor(pred_indexes).unsqueeze(0).to(device)
             pred_mask = model.make_tgt_mask(pred_tensor)
             with torch.no_grad():
@@ -144,16 +144,16 @@ def translate_sentence_beam_search(sent, src_tok, tgt_tok, model, device,
 
             output = F.log_softmax(output, dim=-1)
 
-            # get beam_size indexes having lowest log_softmax values
-            probs, indexes = output[:, -1].data.topk(beam_size)
-            probs = probs.squeeze(0).tolist()
+            # get beam_size indexes having biggest log_softmax values
+            logs, indexes = output[:, -1].data.topk(beam_size)
+            logs = logs.squeeze(0).tolist()
             indexes = indexes.type(torch.int64).squeeze(0).tolist()
 
             # add beam_size new candidates
             for expand_id in range(beam_size):
-                score = probs[expand_id]
+                log = logs[expand_id]
                 token_id = indexes[expand_id]
-                new_candidate = (pred_indexes + [token_id], candidate_score + score)
+                new_candidate = (pred_indexes + [token_id], candidate_log + log)
                 new_candidate_list.append(new_candidate)
 
         # sort and keep n best candidates, where n = beam_size - len(completed_candidates)
@@ -177,8 +177,8 @@ def translate_sentence_beam_search(sent, src_tok, tgt_tok, model, device,
     completed_candidates += candidate_list
 
     pred_sents = list()
-    for token_indexes, log in completed_candidates:
-        pred_tensor = torch.Tensor(token_indexes)
+    for indexes, log in completed_candidates:
+        pred_tensor = torch.Tensor(indexes)
         pred_tokens = tgt_tok.vocab.tensor2words(pred_tensor)
         pred_sents.append((pred_tokens, log))
 

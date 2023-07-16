@@ -72,10 +72,9 @@ class Vocabulary:
         return tokenized_sents
 
     def add_words(self, tokenized_sents, min_freq=1):
-        print("Add tokens from the sentences...")
         word_freq = Counter(chain(*tokenized_sents))
         non_singletons = [w for w in word_freq if word_freq[w] >= min_freq]
-        print(f"Number of tokens in the sentences: {len(word_freq)}")
+        print(f"Number of tokens in the corpus: {len(word_freq)}")
         print(f"Number of tokens appearing at least {min_freq} times: {len(non_singletons)}")
         for word in non_singletons:
             self.add(word)

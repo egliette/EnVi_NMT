@@ -21,14 +21,8 @@ class BaseTokenizer(ABC):
     def detokenize(self, tokens):
         pass
 
-    def build_vocab(self, sents, is_tokenized=False, min_freq=1, vocab_fpath=None):
-        tokenized_sents = list()
-        if vocab_fpath is not None:
-            with open(vocab_fpath, "r") as f:
-                for token in f: 
-                    tokenized_sents.append(token.rstrip("\n"))
-            min_freq = 1
-        elif not is_tokenized:
+    def build_vocab(self, sents, is_tokenized=False, min_freq=1):
+        if not is_tokenized:
             tokenized_sents = self.tokenize(sents)
         else:
             tokenized_sents = sents
@@ -39,6 +33,12 @@ class BaseTokenizer(ABC):
             for token in self.vocab.word2id.keys(): 
                 f.write(token + ("\n"))
 
+    def load_vocab(self, vocab_fpath):
+        if vocab_fpath is not None:
+            with open(vocab_fpath, "r") as f:
+                for token in f: 
+                    self.vocab.add(token.rstrip("\n"))
+        
 
 class ViTokenizer(BaseTokenizer):
 

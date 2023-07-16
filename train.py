@@ -125,7 +125,7 @@ def main(config_fpath="config.yml"):
                         best_checkpoint_fpath)
 
         torch.save({"epoch": epoch,
-                    "loss": best_loss,
+                    "loss": valid_loss,
                     "model_state_dict": model.state_dict(),
                     "optimizer_state_dict": optimizer.state_dict()},
                     last_checkpoint_fpath)

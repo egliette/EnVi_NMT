@@ -11,7 +11,7 @@ class BaseTokenizer(ABC):
     def __init__(self, vocab_fpath=None):
         self.vocab = Vocabulary()
         if vocab_fpath:
-            self.build_vocab(vocab_fpath=vocab_fpath)
+            self.load_vocab(vocab_fpath)
 
     @abstractmethod
     def tokenize(self, sent):

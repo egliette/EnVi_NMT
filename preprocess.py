@@ -15,7 +15,8 @@ from models.vocabulary import ParallelVocabulary
 
 
 def load_dataloader_from_fpath(pair_fpath, src_tok, tgt_tok, batch_size, max_len,
-                               device, is_lowercase, is_train, min_freq, vocab_size):
+                               device, is_lowercase, is_train=False, min_freq=1, 
+                               vocab_size=None):
     ''' 
         Create dataloaders from source and target language data files, 
         train tokenizers (optional).

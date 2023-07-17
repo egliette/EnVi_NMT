@@ -78,7 +78,7 @@ class Vocabulary:
         print(f"Number of tokens appearing at least {min_freq} times: {len(non_singletons)}")
         if vocab_size is not None:
             non_singletons = sorted(non_singletons, key=lambda w: word_freq[w], reverse=True)[:vocab_size]
-        print(f"Total number of Vocabulary tokens (excluding special tokens):{len(non_singletons)}")
+        print(f"Total number of Vocabulary tokens (excluding special tokens): {len(non_singletons)}")
         for word in non_singletons:
             self.add(word)
 

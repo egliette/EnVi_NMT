@@ -21,6 +21,10 @@ checkpoint:
     dataloaders: "dataloaders.pt"
 
 
+# vocabulary options
+min_freq: 1
+vocab_size: null
+
 # training hyperparameters
 batch_size: 32
 total_epoch: 10

@@ -15,7 +15,7 @@ from models.vocabulary import ParallelVocabulary
 
 
 def load_dataloader_from_fpath(pair_fpath, src_tok, tgt_tok, batch_size, max_len,
-                               device, is_lowercase=True, is_train=False):
+                               device, is_lowercase, is_train, min_freq, vocab_size):
     ''' 
         Create dataloaders from source and target language data files, 
         train tokenizers (optional).
@@ -30,6 +30,10 @@ def load_dataloader_from_fpath(pair_fpath, src_tok, tgt_tok, batch_size, max_len
             is_train (bool): if datasets are used for training, shuffle DataLoader
                              and train the tokenizers. If not, sort datasets and
                              DataLoader and skip training the tokenizers
+            min_freq (int) (if is_train == True): the minimum number of occurrences 
+                                                  of tokens to be added to Vocabulary
+            vocab_size (int) (if is_train == True) : the maximum number of tokens 
+                                                     of Vocabulary
         Returns:
             loader (DataLoader): DataLoader where each data is pair of source
                                  and target indexes tensors
@@ -49,9 +53,9 @@ def load_dataloader_from_fpath(pair_fpath, src_tok, tgt_tok, batch_size, max_len
 
     if is_train:
         print(f"Create vocabulary from {pair_fpath['src']}...")
-        src_tok.build_vocab(src_tok_sents, is_tokenized=True)
+        src_tok.build_vocab(src_tok_sents, is_tokenized=True, min_freq=min_freq)
         print(f"Create vocabulary from {pair_fpath['tgt']}...")
-        tgt_tok.build_vocab(tgt_tok_sents, is_tokenized=True)
+        tgt_tok.build_vocab(tgt_tok_sents, is_tokenized=True, min_freq=min_freq)
 
     dataset = ParallelDataset(src_tok_sents, tgt_tok_sents, src_tok, tgt_tok)
     parallel_vocab = ParallelVocabulary(src_tok.vocab, tgt_tok.vocab,
@@ -91,23 +95,25 @@ def main(config_fpath="config.yml"):
                                                                 max_len,
                                                                 device,
                                                                 is_lowercase=True,
-                                                                is_train=True)
+                                                                is_train=True,
+                                                                min_freq=min_freq,
+                                                                vocab_size=vocab_size)
     valid_loader = load_dataloader_from_fpath(path["valid"],
-                                            src_tok,
-                                            tgt_tok,
-                                            batch_size,
-                                            max_len,
-                                            device,
-                                            is_lowercase=True,
-                                            is_train=False)
+                                                src_tok,
+                                                tgt_tok,
+                                                batch_size,
+                                                max_len,
+                                                device,
+                                                is_lowercase=True,
+                                                is_train=False)
     test_loader = load_dataloader_from_fpath(path["test"],
-                                            src_tok,
-                                            tgt_tok,
-                                            batch_size,
-                                            max_len,
-                                            device,
-                                            is_lowercase=True,
-                                            is_train=False)
+                                                src_tok,
+                                                tgt_tok,
+                                                batch_size,
+                                                max_len,
+                                                device,
+                                                is_lowercase=True,
+                                                is_train=False)
 
     dataloaders = {"train_loader": train_loader,
                 "valid_loader": valid_loader,

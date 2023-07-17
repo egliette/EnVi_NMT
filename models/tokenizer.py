@@ -21,12 +21,12 @@ class BaseTokenizer(ABC):
     def detokenize(self, tokens):
         pass
 
-    def build_vocab(self, sents, is_tokenized=False, min_freq=1):
+    def build_vocab(self, sents, is_tokenized=False, min_freq=1, vocab_size=None):
         if not is_tokenized:
             tokenized_sents = self.tokenize(sents)
         else:
             tokenized_sents = sents
-        self.vocab.add_words(tokenized_sents, min_freq)
+        self.vocab.add_words(tokenized_sents, min_freq, vocab_size)
 
     def save_vocab(self, vocab_fpath):
         with open(vocab_fpath, "w") as f:
